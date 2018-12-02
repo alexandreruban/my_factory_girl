@@ -55,5 +55,21 @@ RSpec.describe Factory::AttributeProxy do
           .to raise_error(ArgumentError)
       end
     end
+
+    context "building an association using the attributes for strategy" do
+      before do
+        @strategy = :attributes_for
+        @proxy = Factory::AttributeProxy.new(@factory, @attr, @strategy, @attrs)
+      end
+
+      it "does not build the association" do
+        expect(@factory).not_to receive(@strategy)
+        @proxy.association(:user)
+      end
+
+      it "returns nil for the association" do
+        expect(@proxy.association(:user)).to be_nil
+      end
+    end
   end
 end

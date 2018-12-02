@@ -10,7 +10,11 @@ class Factory
     end
 
     def association(factory_name, attributes = {})
-      Factory.send(strategy, factory_name, attributes)
+      if strategy == :attributes_for
+        nil
+      else
+        Factory.send(strategy, factory_name, attributes)
+      end
     end
 
     def value_for(attribute)
