@@ -1,4 +1,5 @@
 require "my_factory_girl/factory"
 
-class Factory
+def Factory(name, attrs = {})
+  Factory.create(name, attrs)
 end

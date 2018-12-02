@@ -189,7 +189,7 @@ RSpec.describe Factory do
     end
   end
 
-  context "Factory class methods" do
+  context "Factory class" do
     before do
       @name = :user
       @attrs = { last_name: "Override" }
@@ -216,6 +216,12 @@ RSpec.describe Factory do
       it "raises ArgumentError when called with a non existing factory" do
         expect { Factory.send(method, :bogus) }.to raise_error(ArgumentError)
       end
+    end
+
+    it "calls the create method from the top level Factroy() method" do
+      expect(@factory).to receive(:create).with(@attrs)
+
+      Factory(@name, @attrs)
     end
   end
 end
