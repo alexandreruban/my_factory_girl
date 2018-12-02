@@ -1,17 +1,36 @@
 require "spec_helper"
 
 RSpec.describe Factory do
-  context "a factory" do
+  def self.should_instanciate_class
+    it "instaciates the build class" do
+      expect(@instance).to be_a_kind_of(@class)
+    end
+
+    it "assigns the attributes on the instance" do
+      expect(@first_name).to eq(@instance.first_name)
+      expect(@last_name).to eq(@instance.last_name)
+    end
+
+    it "overrides the attributes using the passed hash" do
+      @value = "Davis"
+      @instance = @factory.build(first_name: @value)
+
+      expect(@instance.first_name).to eq(@value)
+    end
+  end
+
+  context "defining a factory" do
     before do
       @factory_name = :user
       @factory = double("factory")
+      @options = { class: "magic" }
       allow(Factory).to receive(:new) { @factory }
     end
 
-    it "creates a new factory" do
-      Factory.define(@factory_name) { |f| }
+    it "creates a new factory using the specified factory name and options" do
+      Factory.define(@factory_name, @options) { |f| }
 
-      expect(Factory).to have_received(:new)
+      expect(Factory).to have_received(:new).with(@factory_name, @options)
     end
 
     it "adds the factory to the factories list" do
@@ -28,9 +47,10 @@ RSpec.describe Factory do
     end
   end
 
-  context "defining a factory" do
+  context "a factory" do
     before do
       @factory_name = :user
+      @class = User
       @factory = Factory.new(@factory_name)
     end
 
@@ -41,6 +61,14 @@ RSpec.describe Factory do
     it "does not allow attributes to be added with value and block" do
       expect { @factory.add_attribute(:name, "value") {} }
         .to raise_error(ArgumentError)
+    end
+
+    it "has a build class" do
+      expect(@factory.build_class).to eq(@class)
+    end
+
+    it "guesses the build class from the factory name" do
+      expect(@factory.build_class).to eq(@class)
     end
 
     context "when adding an attribute with a value parameter" do
@@ -97,6 +125,55 @@ RSpec.describe Factory do
         @factory.add_attribute(@attr) { flunk }
 
         expect(@factory.attributes_for(@hash)[@attr]).to eq(@value)
+      end
+    end
+
+    context "when defined with a custom class" do
+      before do
+        @class = User
+        @factory = Factory.new(:author, class: @class)
+      end
+
+      it "uses the specified class as the build class" do
+        expect(@factory.build_class).to eq(@class)
+      end
+    end
+
+    context "with some attributes added" do
+      before do
+        @first_name = "Billy"
+        @last_name = "The kid"
+        @email = "billy@email.com"
+
+        @factory.add_attribute(:first_name, @first_name)
+        @factory.add_attribute(:last_name, @last_name)
+        @factory.add_attribute(:email, @email)
+      end
+
+      context "when building an instance" do
+        before do
+          @instance = @factory.build
+        end
+
+        should_instanciate_class
+      end
+
+      context "when creating an instance" do
+        before do
+          User.destroy_all
+          @instance = @factory.create
+        end
+
+        should_instanciate_class
+
+        it "saves the instance" do
+          expect(User.count).to eq 1
+        end
+
+        it "raises an ActiveRecord::RecordInvalid for invalid instances" do
+          expect { @factory.create(first_name: nil) }
+            .to raise_error(ActiveRecord::RecordInvalid)
+        end
       end
     end
   end

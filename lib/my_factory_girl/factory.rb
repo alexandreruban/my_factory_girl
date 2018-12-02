@@ -19,6 +19,10 @@ class Factory
     @lazy_attributes = {}
   end
 
+  def build_class
+    @options[:class] || factory_name.to_s.camelize.constantize
+  end
+
   def add_attribute(name, value = nil, &block)
     if block_given?
       unless value.nil?
@@ -37,5 +41,19 @@ class Factory
       result[name] = block.call unless override.keys.include?(name)
     end
     result
+  end
+
+  def build(override = {})
+    instance = build_class.new
+    attributes_for(override).each do |attr, value|
+      instance.send("#{attr}=", value)
+    end
+    instance
+  end
+
+  def create(override = {})
+    instance = build(override)
+    instance.save!
+    instance
   end
 end
