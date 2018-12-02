@@ -1,3 +1,4 @@
+require "active_support"
 require "my_factory_girl/factory"
 
 def Factory(name, attrs = {})
