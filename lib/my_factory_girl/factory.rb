@@ -10,6 +10,24 @@ class Factory
       yield(instance)
       factories[name] = instance
     end
+
+    def attributes_for(name, override = {})
+      factory_by_name(name).attributes_for(override)
+    end
+
+    def build(name, override = {})
+      factory_by_name(name).build(override)
+    end
+
+    def create(name, override = {})
+      factory_by_name(name).create(override)
+    end
+
+    private
+
+    def factory_by_name(name)
+      factories[name] or raise ArgumentError.new("No such factory: #{name.inspect}")
+    end
   end
 
   def initialize(factory_name, options = {})

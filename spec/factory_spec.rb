@@ -164,24 +164,57 @@ RSpec.describe Factory do
         end
 
         should_instanciate_class
+
+        it "does not save the instance" do
+          expect(@instance).to be_a_new_record
+        end
       end
 
       context "when creating an instance" do
         before do
-          User.destroy_all
           @instance = @factory.create
         end
 
         should_instanciate_class
 
         it "saves the instance" do
-          expect(User.count).to eq 1
+          expect(@instance).not_to be_a_new_record
         end
 
         it "raises an ActiveRecord::RecordInvalid for invalid instances" do
           expect { @factory.create(first_name: nil) }
             .to raise_error(ActiveRecord::RecordInvalid)
         end
+      end
+    end
+  end
+
+  context "Factory class methods" do
+    before do
+      @name = :user
+      @attrs = { last_name: "Override" }
+      @first_name = "Johnny"
+      @last_name = "Winter"
+      @class = User
+
+      Factory.define(@name) do |u|
+        u.first_name @first_name
+        u.last_name { @last_name }
+        u.email "jwinter@email.com"
+      end
+
+      @factory = Factory.factories[@name]
+    end
+
+    [:attributes_for, :build, :create].each do |method|
+      it "delegates the method to the factory instance" do
+        expect(@factory).to receive(method).with(@attrs)
+
+        Factory.send(method, @name, @attrs)
+      end
+
+      it "raises ArgumentError when called with a non existing factory" do
+        expect { Factory.send(method, :bogus) }.to raise_error(ArgumentError)
       end
     end
   end
