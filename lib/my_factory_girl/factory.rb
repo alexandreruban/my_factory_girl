@@ -34,7 +34,8 @@ class Factory
     @factory_name = factory_name
     @options = options
     @static_attributes = {}
-    @lazy_attributes = {}
+    @lazy_attribute_blocks = {}
+    @lazy_attribute_names = []
   end
 
   def build_class
@@ -44,10 +45,11 @@ class Factory
   def add_attribute(name, value = nil, &block)
     if block_given?
       unless value.nil?
-        raise ArgumentError, "both value and block given"
+        raise ArgumentError, "Both value and block given"
       end
 
-      @lazy_attributes[name] = block
+      @lazy_attribute_blocks[name] = block
+      @lazy_attribute_names << name
     else
       @static_attributes[name] = value
     end
@@ -75,9 +77,9 @@ class Factory
 
   def build_attributes_hash(override, strategy)
     result = @static_attributes.merge(override)
-    @lazy_attributes.each do |name, block|
-      proxy = AttributeProxy.new(self, name, strategy)
-      result[name] = block.call(proxy) unless override.key?(name)
+    @lazy_attribute_names.each do |name|
+      proxy = AttributeProxy.new(self, name, strategy, result)
+      result[name] = @lazy_attribute_blocks[name].call(proxy) unless override.key?(name)
     end
     result
   end

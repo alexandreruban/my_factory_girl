@@ -94,6 +94,7 @@ RSpec.describe Factory do
     context "when adding an attribute with a block" do
       before do
         @attr = :name
+        @attrs = {}
         @proxy = double("attribute-proxy")
         allow(Factory::AttributeProxy).to receive(:new).and_return(@proxy)
       end
@@ -119,9 +120,34 @@ RSpec.describe Factory do
 
       it "builds an attribute proxy" do
         expect(Factory::AttributeProxy).to receive(:new)
-          .with(@factory, @attr, :attributes_for)
+          .with(@factory, @attr, :attributes_for, @attrs)
         @factory.add_attribute(@attr) {}
         @factory.attributes_for
+      end
+
+      it "yields an attribute proxy to the block" do
+        yielded = nil
+        @factory.add_attribute(@attr) { |y| yielded = y }
+        @factory.attributes_for
+
+        expect(yielded).to eq(@proxy)
+      end
+
+      context "when other attributes have previously been defined" do
+        before do
+          @attr = :unimportant
+          @attrs = { one: "whatever", another: "soup" }
+          @factory.add_attribute(:one, "whatever")
+          @factory.add_attribute(:another) { "soup" }
+          @factory.add_attribute(@attr) {}
+        end
+
+        it "provides previously set attributes" do
+          expect(Factory::AttributeProxy)
+            .to receive(:new)
+            .with(@factory, @attr, :attributes_for, @attrs)
+          @factory.attributes_for
+        end
       end
     end
 
@@ -227,7 +253,7 @@ RSpec.describe Factory do
       end
     end
 
-    it "calls the create method from the top level Factroy() method" do
+    it "calls the create method from the top level Factory() method" do
       expect(@factory).to receive(:create).with(@attrs)
 
       Factory(@name, @attrs)

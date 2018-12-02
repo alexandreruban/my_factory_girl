@@ -5,8 +5,9 @@ RSpec.describe Factory::AttributeProxy do
     before do
       @factory = double("factory")
       @attr = :user
+      @attrs = { first_name: "John" }
       @strategy = :create
-      @proxy = Factory::AttributeProxy.new(@factory, @attr, @strategy)
+      @proxy = Factory::AttributeProxy.new(@factory, @attr, @strategy, @attrs)
     end
 
     it "has a factory" do
@@ -19,6 +20,10 @@ RSpec.describe Factory::AttributeProxy do
 
     it "has a strategy" do
       expect(@proxy.strategy).to eq(@strategy)
+    end
+
+    it "has attributes" do
+      expect(@proxy.current_values).to eq(@attrs)
     end
 
     context "building an association" do
@@ -37,6 +42,17 @@ RSpec.describe Factory::AttributeProxy do
 
       it "returns the built association" do
         expect(@proxy.association(@factory_name)).to eq(@association)
+      end
+    end
+
+    context "fetching the value of an attribute" do
+      before do
+        @attribute = :beachball
+      end
+
+      it "raises ArgumentError when the attribute is not defined" do
+        expect { @proxy.value_for(@attribute) }
+          .to raise_error(ArgumentError)
       end
     end
   end
