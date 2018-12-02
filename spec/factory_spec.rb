@@ -45,23 +45,28 @@ RSpec.describe Factory do
 
       expect(yielded).to eq(@factory)
     end
+  end
 
-    context "defining a sequence" do
-      before do
-        @sequence = double("sequence")
-        @name = :count
-        allow(Factory::Sequence)
-          .to receive(:new)
-          .and_return(@sequence)
-      end
+  it "raises an error when defining a factory when using attribute setters" do
+    expect { Factory.define(:user) { |f| f.name = "test" } }
+      .to raise_error(Factory::AttributeDefinitionError)
+  end
 
-      it "creates a new sequence" do
-        expect(Factory::Sequence)
-          .to receive(:new)
-          .with(no_args)
-          .and_return(@sequence)
-        Factory.sequence(@name)
-      end
+  context "defining a sequence" do
+    before do
+      @sequence = double("sequence")
+      @name = :count
+      allow(Factory::Sequence)
+        .to receive(:new)
+        .and_return(@sequence)
+    end
+
+    it "creates a new sequence" do
+      expect(Factory::Sequence)
+        .to receive(:new)
+        .with(no_args)
+        .and_return(@sequence)
+      Factory.sequence(@name)
     end
   end
 

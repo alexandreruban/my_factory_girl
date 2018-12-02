@@ -3,6 +3,9 @@ class Factory
   @sequences = {}
   attr_reader :factory_name
 
+  class AttributeDefinitionError < RuntimeError
+  end
+
   class << self
     attr_accessor :factories, :sequences
 
@@ -56,6 +59,11 @@ class Factory
   end
 
   def add_attribute(name, value = nil, &block)
+    if name.to_s =~ /=$/
+      raise AttributeDefinitionError, "factory_girl uses 'f.#{name.to_s.chop} \
+        #{value}' rather than 'f.#{name} #{value}'"
+    end
+
     if block_given?
       unless value.nil?
         raise ArgumentError, "Both value and block given"
