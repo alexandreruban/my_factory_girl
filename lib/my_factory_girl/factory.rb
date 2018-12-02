@@ -79,7 +79,9 @@ class Factory
     result = @static_attributes.merge(override)
     @lazy_attribute_names.each do |name|
       proxy = AttributeProxy.new(self, name, strategy, result)
-      result[name] = @lazy_attribute_blocks[name].call(proxy) unless override.key?(name)
+      unless override.key?(name)
+        result[name] = @lazy_attribute_blocks[name].call(proxy)
+      end
     end
     result
   end
