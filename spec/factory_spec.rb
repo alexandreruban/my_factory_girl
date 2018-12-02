@@ -45,6 +45,24 @@ RSpec.describe Factory do
 
       expect(yielded).to eq(@factory)
     end
+
+    context "defining a sequence" do
+      before do
+        @sequence = double("sequence")
+        @name = :count
+        allow(Factory::Sequence)
+          .to receive(:new)
+          .and_return(@sequence)
+      end
+
+      it "creates a new sequence" do
+        expect(Factory::Sequence)
+          .to receive(:new)
+          .with(no_args)
+          .and_return(@sequence)
+        Factory.sequence(@name)
+      end
+    end
   end
 
   context "a factory" do
@@ -257,6 +275,27 @@ RSpec.describe Factory do
       expect(@factory).to receive(:create).with(@attrs)
 
       Factory(@name, @attrs)
+    end
+
+    context "after defining a sequence" do
+      before do
+        @sequence = double("sequence")
+        @name = :test
+        @value = "1 2 5"
+        allow(@sequence).to receive(:next).and_return(@value)
+        allow(Factory::Sequence).to receive(:new).and_return(@sequence)
+
+        Factory.sequence(@name) {}
+      end
+
+      it "calls next on the sequence when sent next" do
+        expect(@sequence).to receive(:next)
+        Factory.next(@name)
+      end
+
+      it "returns the value of the sequence" do
+        expect(Factory.next(@name)).to eq(@value)
+      end
     end
   end
 end

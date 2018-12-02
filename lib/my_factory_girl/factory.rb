@@ -1,14 +1,27 @@
 class Factory
   @factories = {}
+  @sequences = {}
   attr_reader :factory_name
 
   class << self
-    attr_accessor :factories
+    attr_accessor :factories, :sequences
 
     def define(name, options = {})
       instance = Factory.new(name, options)
       yield(instance)
       factories[name] = instance
+    end
+
+    def sequence(name, &block)
+      self.sequences[name] = Sequence.new(&block)
+    end
+
+    def next(sequence)
+      unless self.sequences.key?(sequence)
+        raise "no such sequence: #{sequence}"
+      end
+
+      self.sequences[sequence].next
     end
 
     def attributes_for(name, override = {})
