@@ -35,6 +35,10 @@ class Factory
     end
   end
 
+  def method_missing(name, *args, &block)
+    add_attribute(name, *args, &block)
+  end
+
   def attributes_for(override = {})
     result = @static_attributes.merge(override)
     @lazy_attributes.each do |name, block|

@@ -58,6 +58,14 @@ RSpec.describe Factory do
       expect(@factory.factory_name).to eq(@factory_name)
     end
 
+    it "adds an attribute using the method name when passed an undefined method" do
+      @attr = :first_name
+      @value = "Sugar"
+      @factory.send(@attr, @value)
+
+      expect(@factory.attributes_for[@attr]).to eq(@value)
+    end
+
     it "does not allow attributes to be added with value and block" do
       expect { @factory.add_attribute(:name, "value") {} }
         .to raise_error(ArgumentError)
