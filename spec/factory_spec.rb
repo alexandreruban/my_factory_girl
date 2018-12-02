@@ -94,6 +94,8 @@ RSpec.describe Factory do
     context "when adding an attribute with a block" do
       before do
         @attr = :name
+        @proxy = double("attribute-proxy")
+        allow(Factory::AttributeProxy).to receive(:new).and_return(@proxy)
       end
 
       it "does not evaluate the block when the attribute is loaded" do
@@ -113,6 +115,13 @@ RSpec.describe Factory do
         @factory.add_attribute(@attr) { value }
 
         expect(@factory.attributes_for[@attr]).to eq(value)
+      end
+
+      it "builds an attribute proxy" do
+        expect(Factory::AttributeProxy).to receive(:new)
+          .with(@factory, @attr, :attributes_for)
+        @factory.add_attribute(@attr) {}
+        @factory.attributes_for
       end
     end
 

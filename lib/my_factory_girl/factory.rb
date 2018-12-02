@@ -58,24 +58,36 @@ class Factory
   end
 
   def attributes_for(override = {})
-    result = @static_attributes.merge(override)
-    @lazy_attributes.each do |name, block|
-      result[name] = block.call unless override.keys.include?(name)
-    end
-    result
+    build_attributes_hash(override, :attributes_for)
   end
 
   def build(override = {})
-    instance = build_class.new
-    attributes_for(override).each do |attr, value|
-      instance.send("#{attr}=", value)
-    end
-    instance
+    build_instance(override, :build)
   end
 
   def create(override = {})
     instance = build(override)
     instance.save!
+    instance
+  end
+
+  private
+
+  def build_attributes_hash(override, strategy)
+    result = @static_attributes.merge(override)
+    @lazy_attributes.each do |name, block|
+      proxy = AttributeProxy.new(self, name, strategy)
+      result[name] = block.call(proxy) unless override.key?(name)
+    end
+    result
+  end
+
+  def build_instance(override, strategy)
+    instance = build_class.new
+    attrs = build_attributes_hash(override, strategy)
+    attrs.each do |attr, value|
+      instance.send("#{attr}=", value)
+    end
     instance
   end
 end
