@@ -298,6 +298,11 @@ RSpec.describe Factory do
       it "raises ArgumentError when called with a non existing factory" do
         expect { Factory.send(method, :bogus) }.to raise_error(ArgumentError)
       end
+
+      it "recognises either 'name' and :name for Factory.#{method}" do
+        expect { Factory.send(method, @name.to_s) }.not_to raise_error
+        expect { Factory.send(method, @name) }.not_to raise_error
+      end
     end
 
     it "calls the create method from the top level Factory() method" do
