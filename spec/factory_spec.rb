@@ -24,6 +24,7 @@ RSpec.describe Factory do
       @factory_name = :user
       @factory = double("factory")
       @options = { class: "magic" }
+      allow(@factory).to receive(:factory_name).and_return(@factory_name)
       allow(Factory).to receive(:new) { @factory }
     end
 
@@ -244,6 +245,29 @@ RSpec.describe Factory do
             .to raise_error(ActiveRecord::RecordInvalid)
         end
       end
+    end
+  end
+
+  context "a factory with a string name" do
+    before do
+      @name = :user
+      @factory = Factory.new(@name.to_s) {}
+    end
+
+    it "converts the string to a symbol" do
+      expect(@factory.factory_name).to eq(@name)
+    end
+  end
+
+  context "a factory defined with a string name" do
+    before do
+      Factory.factories = {}
+      @name = :user
+      @factory = Factory.define(@name.to_s) {}
+    end
+
+    it "converts the string to a symbol" do
+      expect(@factory.factory_name).to eq(@name)
     end
   end
 

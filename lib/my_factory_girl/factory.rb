@@ -12,7 +12,7 @@ class Factory
     def define(name, options = {})
       instance = Factory.new(name, options)
       yield(instance)
-      factories[name] = instance
+      factories[instance.factory_name] = instance
     end
 
     def sequence(name, &block)
@@ -42,12 +42,12 @@ class Factory
     private
 
     def factory_by_name(name)
-      factories[name] or raise ArgumentError.new("No such factory: #{name.inspect}")
+      factories[name.to_sym] or raise ArgumentError.new("No such factory: #{name.to_s}")
     end
   end
 
   def initialize(factory_name, options = {})
-    @factory_name = factory_name
+    @factory_name = factory_name.to_sym
     @options = options
     @static_attributes = {}
     @lazy_attribute_blocks = {}
