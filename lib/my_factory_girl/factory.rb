@@ -81,6 +81,14 @@ class Factory
     add_attribute(name, *args, &block)
   end
 
+  def association(name, options = {})
+    name = name.to_sym
+    options = options.symbolize_keys
+    association_factory = options[:factory] || name
+
+    add_attribute(name) { |a| a.association(association_factory) }
+  end
+
   def attributes_for(override = {})
     build_attributes_hash(override, :attributes_for)
   end
