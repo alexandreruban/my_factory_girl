@@ -12,7 +12,7 @@ class Factory
     def define(name, options = {})
       instance = Factory.new(name, options)
       yield(instance)
-      factories[name] = instance
+      factories[instance.factory_name] = instance
     end
 
     def sequence(name, &block)
@@ -42,12 +42,12 @@ class Factory
     private
 
     def factory_by_name(name)
-      factories[name] or raise ArgumentError.new("No such factory: #{name.inspect}")
+      factories[name.to_sym] or raise ArgumentError.new("No such factory: #{name.to_s}")
     end
   end
 
   def initialize(factory_name, options = {})
-    @factory_name = factory_name
+    @factory_name = factory_name.to_sym
     @options = options
     @static_attributes = {}
     @lazy_attribute_blocks = {}
@@ -59,6 +59,7 @@ class Factory
   end
 
   def add_attribute(name, value = nil, &block)
+    name = name.to_sym
     if name.to_s =~ /=$/
       raise AttributeDefinitionError, "factory_girl uses 'f.#{name.to_s.chop} \
         #{value}' rather than 'f.#{name} #{value}'"
@@ -80,6 +81,14 @@ class Factory
     add_attribute(name, *args, &block)
   end
 
+  def association(name, options = {})
+    name = name.to_sym
+    options = options.symbolize_keys
+    association_factory = options[:factory] || name
+
+    add_attribute(name) { |a| a.association(association_factory) }
+  end
+
   def attributes_for(override = {})
     build_attributes_hash(override, :attributes_for)
   end
@@ -97,6 +106,7 @@ class Factory
   private
 
   def build_attributes_hash(override, strategy)
+    override = override.symbolize_keys
     result = @static_attributes.merge(override)
     @lazy_attribute_names.each do |name|
       proxy = AttributeProxy.new(self, name, strategy, result)

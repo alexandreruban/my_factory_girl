@@ -9,7 +9,7 @@ RSpec.describe "Integration test" do
       f.email { |a| "#{a.first_name}.#{a.last_name}@example.com".downcase }
     end
 
-    Factory.define :post do |f|
+    Factory.define "post" do |f|
       f.title "Test Post"
       f.author { |a| a.association(:user) }
     end
@@ -47,7 +47,7 @@ RSpec.describe "Integration test" do
 
   context "a created instance" do
     before do
-      @instance = Factory.create(:post)
+      @instance = Factory.create("post")
     end
 
     it "should be saved" do

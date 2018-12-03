@@ -24,6 +24,7 @@ RSpec.describe Factory do
       @factory_name = :user
       @factory = double("factory")
       @options = { class: "magic" }
+      allow(@factory).to receive(:factory_name).and_return(@factory_name)
       allow(Factory).to receive(:new) { @factory }
     end
 
@@ -102,15 +103,21 @@ RSpec.describe Factory do
       expect(@factory.build_class).to eq(@class)
     end
 
+    it "allows attributes to be added with string as names" do
+      @factory.add_attribute("name", "value")
+
+      expect(@factory.attributes_for[:name]).to eq("value")
+    end
+
     context "when adding an attribute with a value parameter" do
       before do
         @attr = :name
         @value = "Master Yoda"
-        @factory.add_attribute(@name, @value)
+        @factory.add_attribute(@attr, @value)
       end
 
       it "includes the value in the generated attributes hash" do
-        expect(@factory.attributes_for[@name]).to eq(@value)
+        expect(@factory.attributes_for[@attr]).to eq(@value)
       end
     end
 
@@ -192,6 +199,13 @@ RSpec.describe Factory do
 
         expect(@factory.attributes_for(@hash)[@attr]).to eq(@value)
       end
+
+      it "should override a symbol parameter with a string parameter" do
+        @factory.add_attribute(@attr, "The price is wrong, Bob!")
+        @hash = { @attr.to_s => @value }
+
+        expect(@factory.attributes_for(@hash)[@attr]).to eq(@value)
+      end
     end
 
     context "when defined with a custom class" do
@@ -247,6 +261,29 @@ RSpec.describe Factory do
     end
   end
 
+  context "a factory with a string name" do
+    before do
+      @name = :user
+      @factory = Factory.new(@name.to_s) {}
+    end
+
+    it "converts the string to a symbol" do
+      expect(@factory.factory_name).to eq(@name)
+    end
+  end
+
+  context "a factory defined with a string name" do
+    before do
+      Factory.factories = {}
+      @name = :user
+      @factory = Factory.define(@name.to_s) {}
+    end
+
+    it "converts the string to a symbol" do
+      expect(@factory.factory_name).to eq(@name)
+    end
+  end
+
   context "Factory class" do
     before do
       @name = :user
@@ -273,6 +310,11 @@ RSpec.describe Factory do
 
       it "raises ArgumentError when called with a non existing factory" do
         expect { Factory.send(method, :bogus) }.to raise_error(ArgumentError)
+      end
+
+      it "recognises either 'name' and :name for Factory.#{method}" do
+        expect { Factory.send(method, @name.to_s) }.not_to raise_error
+        expect { Factory.send(method, @name) }.not_to raise_error
       end
     end
 
