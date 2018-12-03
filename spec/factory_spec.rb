@@ -103,15 +103,21 @@ RSpec.describe Factory do
       expect(@factory.build_class).to eq(@class)
     end
 
+    it "allows attributes to be added with string as names" do
+      @factory.add_attribute("name", "value")
+
+      expect(@factory.attributes_for[:name]).to eq("value")
+    end
+
     context "when adding an attribute with a value parameter" do
       before do
         @attr = :name
         @value = "Master Yoda"
-        @factory.add_attribute(@name, @value)
+        @factory.add_attribute(@attr, @value)
       end
 
       it "includes the value in the generated attributes hash" do
-        expect(@factory.attributes_for[@name]).to eq(@value)
+        expect(@factory.attributes_for[@attr]).to eq(@value)
       end
     end
 
@@ -190,6 +196,13 @@ RSpec.describe Factory do
 
       it "does not call a lazy attribute block for an overriden attribute" do
         @factory.add_attribute(@attr) { flunk }
+
+        expect(@factory.attributes_for(@hash)[@attr]).to eq(@value)
+      end
+
+      it "should override a symbol parameter with a string parameter" do
+        @factory.add_attribute(@attr, "The price is wrong, Bob!")
+        @hash = { @attr.to_s => @value }
 
         expect(@factory.attributes_for(@hash)[@attr]).to eq(@value)
       end

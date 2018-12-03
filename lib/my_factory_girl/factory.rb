@@ -59,6 +59,7 @@ class Factory
   end
 
   def add_attribute(name, value = nil, &block)
+    name = name.to_sym
     if name.to_s =~ /=$/
       raise AttributeDefinitionError, "factory_girl uses 'f.#{name.to_s.chop} \
         #{value}' rather than 'f.#{name} #{value}'"
@@ -97,6 +98,7 @@ class Factory
   private
 
   def build_attributes_hash(override, strategy)
+    override = override.symbolize_keys
     result = @static_attributes.merge(override)
     @lazy_attribute_names.each do |name|
       proxy = AttributeProxy.new(self, name, strategy, result)
