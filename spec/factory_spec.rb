@@ -181,6 +181,42 @@ RSpec.describe Factory do
       end
     end
 
+    context "when adding an association without a factory name" do
+      before do
+        @factory = Factory.new(:post)
+        @name = :user
+        @factory.association(@name)
+        allow_any_instance_of(Post).to receive(:user=)
+      end
+
+      it "adds an attribute with the name of the association" do
+        expect(@factory.attributes_for.key?(@name)).to be true
+      end
+
+      it "creates a block that builds the association" do
+        expect(Factory).to receive(:build).with(@name, {})
+        @factory.build
+      end
+    end
+
+    context "when adding an association with a factory name" do
+      before do
+        @factory = Factory.new(:post)
+        @name = :author
+        @factory_name = :user
+        @factory.association(@name, factory: @factory_name)
+      end
+
+      it "adds the attribute with the name of the association" do
+        expect(@factory.attributes_for.key?(@name)).to be true
+      end
+
+      it "creates a block that builds the associaiton" do
+        expect(Factory).to receive(:build).with(@factory_name, {})
+        @factory.build
+      end
+    end
+
     context "when overriding generated attributes with a hash" do
       before do
         @attr = :name

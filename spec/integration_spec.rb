@@ -11,7 +11,7 @@ RSpec.describe "Integration test" do
 
     Factory.define "post" do |f|
       f.title "Test Post"
-      f.author { |a| a.association(:user) }
+      f.association :author, factory: :user
     end
 
     Factory.define :admin, class: User do |f|
