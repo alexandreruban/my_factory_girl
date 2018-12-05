@@ -49,9 +49,7 @@ class Factory
   def initialize(factory_name, options = {})
     @factory_name = factory_name_for(factory_name)
     @options = options
-    @static_attributes = {}
-    @lazy_attribute_blocks = {}
-    @lazy_attribute_names = []
+    @attributes = []
   end
 
   def build_class
@@ -65,15 +63,16 @@ class Factory
         #{value}' rather than 'f.#{name} #{value}'"
     end
 
+    attribute = Attribute.new(name)
+    @attributes << attribute
+
     if block_given?
       unless value.nil?
         raise ArgumentError, "Both value and block given"
       end
-
-      @lazy_attribute_blocks[name] = block
-      @lazy_attribute_names << name
+      attribute.lazy_block = block
     else
-      @static_attributes[name] = value
+      attribute.static_value = value
     end
   end
 
@@ -105,16 +104,15 @@ class Factory
 
   private
 
-  def build_attributes_hash(override, strategy)
-    override = override.symbolize_keys
-    result = @static_attributes.merge(override)
-    @lazy_attribute_names.each do |name|
-      proxy = AttributeProxy.new(self, name, strategy, result)
-      unless override.key?(name)
-        result[name] = @lazy_attribute_blocks[name].call(proxy)
+  def build_attributes_hash(values, strategy)
+    values = values.symbolize_keys
+    @attributes.each do |attribute|
+      unless values.key?(attribute.name)
+        proxy = AttributeProxy.new(self, attribute.name, strategy, values)
+        values[attribute.name] = attribute.value(proxy)
       end
     end
-    result
+    values
   end
 
   def build_instance(override, strategy)

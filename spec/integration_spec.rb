@@ -9,7 +9,7 @@ RSpec.describe "Integration test" do
       f.email { |a| "#{a.first_name}.#{a.last_name}@example.com".downcase }
     end
 
-    Factory.define "post" do |f|
+    Factory.define Post do |f|
       f.title "Test Post"
       f.association :author, factory: :user
     end
