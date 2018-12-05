@@ -47,7 +47,7 @@ class Factory
   end
 
   def initialize(factory_name, options = {})
-    @factory_name = factory_name.to_sym
+    @factory_name = factory_name_for(factory_name)
     @options = options
     @static_attributes = {}
     @lazy_attribute_blocks = {}
@@ -55,7 +55,7 @@ class Factory
   end
 
   def build_class
-    @options[:class] || factory_name.to_s.camelize.constantize
+    @build_class ||= class_for(@options[:class] || factory_name)
   end
 
   def add_attribute(name, value = nil, &block)
@@ -124,5 +124,21 @@ class Factory
       instance.send("#{attr}=", value)
     end
     instance
+  end
+
+  def class_for(class_or_to_s)
+    if class_or_to_s.respond_to?(:to_sym)
+      class_or_to_s.to_s.camelize.constantize
+    else
+      class_or_to_s
+    end
+  end
+
+  def factory_name_for(class_or_to_s)
+    if class_or_to_s.respond_to?(:to_sym)
+      class_or_to_s.to_sym
+    else
+      class_or_to_s.to_s.underscore.to_sym
+    end
   end
 end

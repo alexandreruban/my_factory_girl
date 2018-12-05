@@ -255,6 +255,33 @@ RSpec.describe Factory do
       end
     end
 
+    context "when defined with a class instead of a name" do
+      before do
+        @class = ArgumentError
+        @name = :argument_error
+        @factory = Factory.new(@class)
+      end
+
+      it "guesses the factory name from the class" do
+        expect(@factory.factory_name).to eq(@name)
+      end
+
+      it "uses the class as the build class" do
+        expect(@factory.build_class).to eq(@class)
+      end
+    end
+
+    context "when defined with a custom class" do
+      before do
+        @class = ArgumentError
+        @factory = Factory.new(:author, class: :argument_error)
+      end
+
+      it "uses the specified class as the build class" do
+        expect(@factory.build_class).to eq(@class)
+      end
+    end
+
     context "with some attributes added" do
       before do
         @first_name = "Billy"
