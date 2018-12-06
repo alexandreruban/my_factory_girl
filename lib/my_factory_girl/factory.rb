@@ -55,6 +55,11 @@ class Factory
 
   def add_attribute(name, value = nil, &block)
     attribute = Attribute.new(name, value, block)
+
+    if attribute_defined?(attribute.name)
+      raise AttributeDefinitionError, "Attribute already defined: #{name}"
+    end
+
     @attributes << attribute
   end
 
@@ -120,5 +125,9 @@ class Factory
     else
       class_or_to_s.to_s.underscore.to_sym
     end
+  end
+
+  def attribute_defined?(name)
+    !@attributes.detect { |attribute| attribute.name == name }.nil?
   end
 end

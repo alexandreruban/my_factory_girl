@@ -89,6 +89,11 @@ RSpec.describe Factory do
       expect(@factory.build_class).to eq(@class)
     end
 
+    it "does not allow the same attribute to be defined twice" do
+      expect { 2.times { @factory.add_attribute(:name, "John") } }
+        .to raise_error(Factory::AttributeDefinitionError)
+    end
+
     it "guesses the build class from the factory name" do
       expect(@factory.build_class).to eq(@class)
     end
