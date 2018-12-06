@@ -48,11 +48,6 @@ RSpec.describe Factory do
     end
   end
 
-  it "raises an error when defining a factory when using attribute setters" do
-    expect { Factory.define(:user) { |f| f.name = "test" } }
-      .to raise_error(Factory::AttributeDefinitionError)
-  end
-
   context "defining a sequence" do
     before do
       @sequence = double("sequence")
@@ -88,11 +83,6 @@ RSpec.describe Factory do
       @factory.send(@attr, @value)
 
       expect(@factory.attributes_for[@attr]).to eq(@value)
-    end
-
-    it "does not allow attributes to be added with value and block" do
-      expect { @factory.add_attribute(:name, "value") {} }
-        .to raise_error(ArgumentError)
     end
 
     it "has a build class" do

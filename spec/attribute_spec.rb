@@ -1,38 +1,57 @@
 require "spec_helper"
 
 RSpec.describe Factory::Attribute do
+  before do
+    @proxy = double("attribute-proxy")
+  end
+
+  it "raises an error when defining an attribute writer" do
+    expect { Factory::Attribute.new(:content=, "writer", nil) }
+      .to raise_error(Factory::AttributeDefinitionError)
+  end
+
+  it "not allow attributes to be added with both a value parameter and a block" do
+    expect { Factory::Attribute.new(:content=, "writer", Proc.new {}) }
+      .to raise_error(Factory::AttributeDefinitionError)
+  end
+
+  it "converts names to symbols" do
+    expect(Factory::Attribute.new("name", nil, nil).name).to eq(:name)
+  end
+
   context "an attribute" do
     before do
       @name = :user
-      @proxy = double("attribute-proxy")
-      @attr = Factory::Attribute.new(@name)
+      @attr = Factory::Attribute.new(@name, "test", nil)
     end
 
     it "has a name" do
       expect(@attr.name).to eq(@name)
     end
+  end
 
-    context "after setting a static attribute" do
-      before do
-        @value = "test"
-        @attr.static_value = @value
-      end
-
-      it "returns the value" do
-        expect(@attr.value(@proxy)).to eq(@value)
-      end
+  context "an attribute with a statix value" do
+    before do
+      @value = "test"
+      @attr = Factory::Attribute.new(:user, @value, nil)
     end
 
-    context "after setting a lazy value" do
-      it "calls the block to retrun a value" do
-        @attr.lazy_block = proc { "value" }
-        expect(@attr.value(@proxy)).to eq("value")
-      end
+    it "returns the value" do
+      expect(@attr.value(@proxy)).to eq(@value)
+    end
+  end
 
-      it "yields the attribute proxy to the block" do
-        @attr.lazy_block = proc { |a| a }
-        expect(@attr.value(@proxy)).to eq(@proxy)
-      end
+  context "an attribute with a lazy value" do
+    it "calls the block to retrun a value" do
+      @block = Proc.new { "value" }
+      @attr = Factory::Attribute.new(:user, nil, @block)
+      expect(@attr.value(@proxy)).to eq("value")
+    end
+
+    it "yields the attribute proxy to the block" do
+      @block = Proc.new { |a| a }
+      @attr = Factory::Attribute.new(:user, nil, @block)
+      expect(@attr.value(@proxy)).to eq(@proxy)
     end
   end
 end
