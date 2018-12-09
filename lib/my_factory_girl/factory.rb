@@ -1,27 +1,14 @@
 class Factory
   @factories = {}
-  @sequences = {}
   attr_reader :factory_name
 
   class << self
-    attr_accessor :factories, :sequences
+    attr_accessor :factories
 
     def define(name, options = {})
       instance = Factory.new(name, options)
       yield(instance)
       factories[instance.factory_name] = instance
-    end
-
-    def sequence(name, &block)
-      self.sequences[name] = Sequence.new(&block)
-    end
-
-    def next(sequence)
-      unless self.sequences.key?(sequence)
-        raise "no such sequence: #{sequence}"
-      end
-
-      self.sequences[sequence].next
     end
 
     def attributes_for(name, override = {})
@@ -93,8 +80,9 @@ class Factory
 
   def build_attributes_hash(values, strategy)
     values = values.symbolize_keys
+    passed_keys = values.keys.map { |key| Factory.aliases_for(key) }.flatten
     @attributes.each do |attribute|
-      unless values.key?(attribute.name)
+      unless passed_keys.include?(attribute.name)
         proxy = AttributeProxy.new(self, attribute.name, strategy, values)
         values[attribute.name] = attribute.value(proxy)
       end

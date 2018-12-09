@@ -45,6 +45,28 @@ RSpec.describe "Integration test" do
     end
   end
 
+  context "a build instance" do
+    before do
+      @instance = Factory.build(:post)
+    end
+
+    it "is not saved" do
+      expect(@instance).to be_a_new_record
+    end
+
+    it "assigns associations" do
+      expect(@instance.author).to be_a_kind_of(User)
+    end
+
+    it "does not save associations" do
+      expect(@instance.author).to be_a_new_record
+    end
+
+    it "it does not assign both an association and its foreign key" do
+      expect(Factory.build(:post, author_id: 1).author_id).to eq(1)
+    end
+  end
+
   context "a created instance" do
     before do
       @instance = Factory.create("post")

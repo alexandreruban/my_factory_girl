@@ -48,24 +48,6 @@ RSpec.describe Factory do
     end
   end
 
-  context "defining a sequence" do
-    before do
-      @sequence = double("sequence")
-      @name = :count
-      allow(Factory::Sequence)
-        .to receive(:new)
-        .and_return(@sequence)
-    end
-
-    it "creates a new sequence" do
-      expect(Factory::Sequence)
-        .to receive(:new)
-        .with(no_args)
-        .and_return(@sequence)
-      Factory.sequence(@name)
-    end
-  end
-
   context "a factory" do
     before do
       @factory_name = :user
@@ -239,6 +221,22 @@ RSpec.describe Factory do
       end
     end
 
+    context "when overriding an attribute with an alias" do
+      before do
+        @factory.add_attribute(:test, "original")
+        Factory.alias(/(.*)_alias/, '\1')
+        @result = @factory.attributes_for(test_alias: "new")
+      end
+
+      it "it uses the passed in value for the alias" do
+        expect(@result[:test_alias]).to eq("new")
+      end
+
+      it "discards the predefined value for the attribute" do
+        expect(@result[:test]).to be_nil
+      end
+    end
+
     context "when defined with a custom class" do
       before do
         @class = User
@@ -380,27 +378,6 @@ RSpec.describe Factory do
       expect(@factory).to receive(:create).with(@attrs)
 
       Factory(@name, @attrs)
-    end
-
-    context "after defining a sequence" do
-      before do
-        @sequence = double("sequence")
-        @name = :test
-        @value = "1 2 5"
-        allow(@sequence).to receive(:next).and_return(@value)
-        allow(Factory::Sequence).to receive(:new).and_return(@sequence)
-
-        Factory.sequence(@name) {}
-      end
-
-      it "calls next on the sequence when sent next" do
-        expect(@sequence).to receive(:next)
-        Factory.next(@name)
-      end
-
-      it "returns the value of the sequence" do
-        expect(Factory.next(@name)).to eq(@value)
-      end
     end
   end
 end
