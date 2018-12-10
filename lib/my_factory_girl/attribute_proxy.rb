@@ -13,7 +13,7 @@ class Factory
       if strategy == :attributes_for
         nil
       else
-        Factory.send(strategy, factory_name, attributes)
+        Factory.create(factory_name, attributes)
       end
     end
 

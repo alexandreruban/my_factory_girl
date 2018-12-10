@@ -45,6 +45,40 @@ RSpec.describe Factory::AttributeProxy do
       end
     end
 
+    context "building an association using the attributes_for strategy" do
+      before do
+        @strategy = :attributes_for
+        @proxy = Factory::AttributeProxy.new(@factory, @attr, @strategy, @attrs)
+      end
+
+      it "does not build the association" do
+        expect(Factory).not_to receive(@strategy)
+        @proxy.association(@attr)
+      end
+
+      it "returns nil for the association" do
+        expect(@proxy.association(@name)).to be_nil
+      end
+    end
+
+    context "building an association using the build strategy" do
+      before do
+        @strategy = :build
+        @built = "object"
+        @proxy = Factory::AttributeProxy.new(@factory, @attr, @strategy, @attrs)
+        allow(Factory).to receive(:create).and_return(@build)
+      end
+
+      it "creates the association" do
+        expect(Factory).to receive(:create).with(:user, {}).and_return(@build)
+        @proxy.association(@attr)
+      end
+
+      it "returns the created object" do
+        expect(@proxy.association(@attr)).to eq(@build)
+      end
+    end
+
     context "fetching the value of an attribute" do
       before do
         @attribute = :beachball

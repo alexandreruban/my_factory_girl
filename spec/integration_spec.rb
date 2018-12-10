@@ -58,8 +58,8 @@ RSpec.describe "Integration test" do
       expect(@instance.author).to be_a_kind_of(User)
     end
 
-    it "does not save associations" do
-      expect(@instance.author).to be_a_new_record
+    it "saves the associations" do
+      expect(@instance.author).not_to be_a_new_record
     end
 
     it "it does not assign both an association and its foreign key" do

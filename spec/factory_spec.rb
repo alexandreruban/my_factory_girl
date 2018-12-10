@@ -164,6 +164,7 @@ RSpec.describe Factory do
         @name = :user
         @factory.association(@name)
         allow_any_instance_of(Post).to receive(:user=)
+        allow(Factory).to receive(:create)
       end
 
       it "adds an attribute with the name of the association" do
@@ -171,7 +172,7 @@ RSpec.describe Factory do
       end
 
       it "creates a block that builds the association" do
-        expect(Factory).to receive(:build).with(@name, {})
+        expect(Factory).to receive(:create).with(@name, {})
         @factory.build
       end
     end
@@ -189,7 +190,7 @@ RSpec.describe Factory do
       end
 
       it "creates a block that builds the associaiton" do
-        expect(Factory).to receive(:build).with(@factory_name, {})
+        expect(Factory).to receive(:create).with(@factory_name, {})
         @factory.build
       end
     end
