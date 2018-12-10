@@ -317,6 +317,22 @@ RSpec.describe Factory do
     end
   end
 
+  context "a factory with a name ending in s" do
+    before do
+      @name = :business
+      @class = Business
+      @factory = Factory.new(@name)
+    end
+
+    it "has a factory name" do
+      expect(@factory.factory_name).to eq(@name)
+    end
+
+    it "has a build class" do
+      expect(@factory.build_class).to eq(@class)
+    end
+  end
+
   context "a factory with a string name" do
     before do
       @name = :user
