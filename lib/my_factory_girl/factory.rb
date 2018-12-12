@@ -84,7 +84,7 @@ class Factory
     passed_keys = values.keys.map { |key| Factory.aliases_for(key) }.flatten
     @attributes.each do |attribute|
       unless passed_keys.include?(attribute.name)
-        proxy = AttributeProxy.new(self, attribute.name, strategy, values)
+        proxy = AttributeProxy.new(strategy, values)
         values[attribute.name] = attribute.value(proxy)
       end
     end

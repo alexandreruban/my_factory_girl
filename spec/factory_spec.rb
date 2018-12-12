@@ -127,7 +127,7 @@ RSpec.describe Factory do
 
       it "builds an attribute proxy" do
         expect(Factory::AttributeProxy).to receive(:new)
-          .with(@factory, @attr, :attributes_for, @attrs)
+          .with(:attributes_for, @attrs)
         @factory.add_attribute(@attr) {}
         @factory.attributes_for
       end
@@ -152,7 +152,7 @@ RSpec.describe Factory do
         it "provides previously set attributes" do
           expect(Factory::AttributeProxy)
             .to receive(:new)
-            .with(@factory, @attr, :attributes_for, @attrs)
+            .with(:attributes_for, @attrs)
           @factory.attributes_for
         end
       end

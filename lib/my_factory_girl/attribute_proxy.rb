@@ -1,10 +1,8 @@
 class Factory
   class AttributeProxy
-    attr_accessor :factory, :attribute_name, :strategy, :current_values
+    attr_accessor :strategy, :current_values
 
-    def initialize(factory, attribute_name, strategy, values)
-      @factory = factory
-      @attribute_name = attribute_name
+    def initialize(strategy, values)
       @strategy = strategy
       @current_values = values
     end
@@ -18,15 +16,11 @@ class Factory
     end
 
     def value_for(attribute)
-      unless current_values.key?(attribute)
-        raise ArgumentError, "No such attribute: #{attribute.inspect}"
-      end
-
       current_values[attribute]
     end
 
     def method_missing(name, *args, &block)
-      current_values[name]
+      value_for(name)
     end
   end
 end
