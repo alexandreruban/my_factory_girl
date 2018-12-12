@@ -1,14 +1,13 @@
 class Factory
   class AttributeProxy
-    attr_accessor :strategy, :current_values
+    attr_accessor :strategy
 
-    def initialize(strategy, values)
+    def initialize(strategy)
       @strategy = strategy
-      @current_values = values
     end
 
     def association(factory_name, attributes = {})
-      if strategy == :attributes_for
+      if strategy == Strategy::AttributesFor
         nil
       else
         Factory.create(factory_name, attributes)
@@ -16,7 +15,7 @@ class Factory
     end
 
     def value_for(attribute)
-      current_values[attribute]
+      strategy.get(attribute)
     end
 
     def method_missing(name, *args, &block)

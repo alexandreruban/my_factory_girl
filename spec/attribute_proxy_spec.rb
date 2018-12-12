@@ -3,31 +3,28 @@ require "spec_helper"
 RSpec.describe Factory::AttributeProxy do
   context "an association proxy" do
     before do
-      @attrs = { first_name: "John" }
-      @strategy = :create
-      @proxy = Factory::AttributeProxy.new(@strategy, @attrs)
+      @strategy = double("strategy")
+      @proxy = Factory::AttributeProxy.new(@strategy)
     end
 
-    it "has a build strategy" do
+    it "has a strategy" do
       expect(@proxy.strategy).to eq(@strategy)
     end
 
-    it "has attributes" do
-      expect(@proxy.current_values).to eq(@attrs)
+    it "returns a value from the strategy for an attribute's value" do
+      allow(@strategy).to receive(:get).with(:name).and_return("Alex")
+      expect(@proxy.value_for(:name)).to eq("Alex")
     end
 
-    it "returns the correct value for an attribute" do
-      expect(@proxy.value_for(:first_name)).to eq(@attrs[:first_name])
-    end
-
-    it "calls value_for for undefined methods" do
-      expect(@proxy.first_name).to eq(@attrs[:first_name])
+    it "it returns a value from the strategy for an undefined method" do
+      allow(@strategy).to receive(:get).with(:name).and_return("Alex")
+      expect(@proxy.value_for(:name)).to eq("Alex")
     end
 
     context "building an association using the AttributesFor strategy" do
       before do
-        @strategy = :attributes_for
-        @proxy = Factory::AttributeProxy.new(@strategy, @attrs)
+        @strategy = Factory::Strategy::AttributesFor.new(Object)
+        @proxy = Factory::AttributeProxy.new(@strategy)
       end
 
       it "does not build the association" do
@@ -40,12 +37,11 @@ RSpec.describe Factory::AttributeProxy do
       end
     end
 
-    ["build", "create"].each do |strategy|
-      context "an association usign the #{strategy} strategy" do
+    [Factory::Strategy::Build, Factory::Strategy::Create].each do |strategy_class|
+      context "an association usign the #{strategy_class.name} strategy" do
         before do
-          @strategy = strategy.to_sym
-          @attrs = { first_name: "John" }
-          @proxy = Factory::AttributeProxy.new(@strategy, @attrs)
+          @strategy = strategy_class.new(Object)
+          @proxy = Factory::AttributeProxy.new(@strategy)
         end
 
         it "calls Factory.create when building the association" do
