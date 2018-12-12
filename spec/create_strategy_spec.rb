@@ -1,7 +1,7 @@
 require "spec_helper"
 
 RSpec.describe Factory::Strategy::Create do
-  context "with a class to build" do
+  context "the build strategy" do
     before do
       @class = Class.new
       @instance = double("built-instance")
@@ -13,11 +13,7 @@ RSpec.describe Factory::Strategy::Create do
       allow(@instance).to receive(:attribute=)
       allow(@instance).to receive(:owner=)
       allow(@instance).to receive(:save!)
-    end
-  end
 
-  context "the build strategy" do
-    before do
       @strategy = Factory::Strategy::Create.new(@class)
     end
 
@@ -35,8 +31,26 @@ RSpec.describe Factory::Strategy::Create do
 
     context "when asked for the result" do
       it "saves the instance" do
-        expect(@instance).to receive(:save).with(no_args)
+        expect(@instance).to receive(:save!).with(no_args)
         @result = @strategy.result
+      end
+
+      it "returns the built instance" do
+        expect(@strategy.result).to eq(@instance)
+      end
+    end
+
+    context "when setting an attribute" do
+      it "sets that value" do
+        expect(@instance).to receive(:attribute=).with("value")
+        @strategy.set(:attribute, "value")
+      end
+    end
+
+    context "when getting an attribute" do
+      it "returns the value" do
+        expect(@instance).to receive(:attribute).and_return("value")
+        @strategy.get(:attribute)
       end
     end
   end
