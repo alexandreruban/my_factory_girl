@@ -2,7 +2,7 @@ require "spec_helper"
 
 RSpec.describe Factory::Attribute do
   before do
-    @proxy = double("attribute-proxy")
+    @strategy = double("strategy")
   end
 
   it "raises an error when defining an attribute writer" do
@@ -36,22 +36,28 @@ RSpec.describe Factory::Attribute do
       @attr = Factory::Attribute.new(:user, @value, nil)
     end
 
-    it "returns the value" do
-      expect(@attr.value(@proxy)).to eq(@value)
+    it "returns the value without building a proxy" do
+      expect(Factory::AttributeProxy).not_to receive(:new)
+      expect(@attr.value(@strategy)).to eq(@value)
     end
   end
 
   context "an attribute with a lazy value" do
     it "calls the block to retrun a value" do
-      @block = Proc.new { "value" }
+      @block = -> (a) { "value" }
       @attr = Factory::Attribute.new(:user, nil, @block)
-      expect(@attr.value(@proxy)).to eq("value")
+      expect(@attr.value(@strategy)).to eq("value")
     end
 
     it "yields the attribute proxy to the block" do
-      @block = Proc.new { |a| a }
+      @block = -> (a) { a }
       @attr = Factory::Attribute.new(:user, nil, @block)
-      expect(@attr.value(@proxy)).to eq(@proxy)
+      proxy = double("attribute-proxy")
+      allow(Factory::AttributeProxy)
+        .to receive(:new)
+        .with(@strategy)
+        .and_return(proxy)
+      expect(@attr.value(@strategy)).to eq(proxy)
     end
   end
 end
