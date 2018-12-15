@@ -20,41 +20,41 @@ RSpec.describe Factory::AttributeProxy do
       allow(@strategy).to receive(:get).with(:name).and_return("Alex")
       expect(@proxy.value_for(:name)).to eq("Alex")
     end
+  end
 
-    context "building an association using the AttributesFor strategy" do
+  context "building an association using the AttributesFor strategy" do
+    before do
+      @strategy = Factory::Strategy::AttributesFor
+      @proxy = Factory::AttributeProxy.new(@strategy)
+    end
+
+    it "does not build the association" do
+      expect(Factory).not_to receive(:create)
+      @proxy.association(:user)
+    end
+
+    it "returns nil for the association" do
+      expect(@proxy.association(:user)).to be_nil
+    end
+  end
+
+  [Factory::Strategy::Build, Factory::Strategy::Create].each do |strategy_class|
+    context "an association usign the #{strategy_class.name} strategy" do
       before do
-        @strategy = Factory::Strategy::AttributesFor.new(Object)
+        @strategy = strategy_class.new(Object)
         @proxy = Factory::AttributeProxy.new(@strategy)
       end
 
-      it "does not build the association" do
-        expect(Factory).not_to receive(@strategy)
-        @proxy.association(:user)
+      it "calls Factory.create when building the association" do
+        attribs = { first_name: "Billy" }
+        expect(Factory).to receive(:create).with(:user, attribs)
+        @proxy.association(:user, attribs)
       end
 
-      it "returns nil for the association" do
-        expect(@proxy.association(:user)).to be_nil
-      end
-    end
-
-    [Factory::Strategy::Build, Factory::Strategy::Create].each do |strategy_class|
-      context "an association usign the #{strategy_class.name} strategy" do
-        before do
-          @strategy = strategy_class.new(Object)
-          @proxy = Factory::AttributeProxy.new(@strategy)
-        end
-
-        it "calls Factory.create when building the association" do
-          attribs = { first_name: "Billy" }
-          expect(Factory).to receive(:create).with(:user, attribs)
-          @proxy.association(:user, attribs)
-        end
-
-        it "returns the built association" do
-          association = double("built-user")
-          allow(Factory).to receive(:create).and_return(association)
-          expect(@proxy.association(:user)).to eq(association)
-        end
+      it "returns the built association" do
+        association = double("built-user")
+        allow(Factory).to receive(:create).and_return(association)
+        expect(@proxy.association(:user)).to eq(association)
       end
     end
   end

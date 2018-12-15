@@ -63,41 +63,31 @@ class Factory
     add_attribute(name) { |a| a.association(association_factory) }
   end
 
-  def attributes_for(override = {})
-    build_attributes_hash(override, :attributes_for)
+  def attributes_for(overrides = {})
+    run_strategy(Strategy::AttributesFor, overrides)
   end
 
-  def build(override = {})
-    build_instance(override, :build)
+  def build(overrides = {})
+    run_strategy(Strategy::Build, overrides)
   end
 
-  def create(override = {})
-    instance = build(override)
-    instance.save!
-    instance
+  def create(overrides = {})
+    run_strategy(Strategy::Create, overrides)
   end
 
   private
 
-  def build_attributes_hash(values, strategy)
-    values = symbolize_keys(values)
-    passed_keys = values.keys.map { |key| Factory.aliases_for(key) }.flatten
+  def run_strategy(strategy_class, overrides)
+    strategy = strategy_class.new(build_class)
+    overrides = symbolize_keys(overrides)
+    overrides.each { |attr, val| strategy.set(attr, val) }
+    passed_keys = overrides.keys.map { |key| Factory.aliases_for(key) }.flatten
     @attributes.each do |attribute|
       unless passed_keys.include?(attribute.name)
-        proxy = AttributeProxy.new(strategy, values)
-        values[attribute.name] = attribute.value(proxy)
+        strategy.set(attribute.name, attribute.value(strategy))
       end
     end
-    values
-  end
-
-  def build_instance(override, strategy)
-    instance = build_class.new
-    attrs = build_attributes_hash(override, strategy)
-    attrs.each do |attr, value|
-      instance.send("#{attr}=", value)
-    end
-    instance
+    strategy.result
   end
 
   def class_for(class_or_to_s)

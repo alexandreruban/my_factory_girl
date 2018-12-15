@@ -126,8 +126,9 @@ RSpec.describe Factory do
       end
 
       it "builds an attribute proxy" do
-        expect(Factory::AttributeProxy).to receive(:new)
-          .with(:attributes_for, @attrs)
+        expect(Factory::AttributeProxy)
+          .to receive(:new)
+          .with(an_instance_of(Factory::Strategy::AttributesFor))
         @factory.add_attribute(@attr) {}
         @factory.attributes_for
       end
@@ -142,17 +143,17 @@ RSpec.describe Factory do
 
       context "when other attributes have previously been defined" do
         before do
-          @attr = :unimportant
           @attrs = { one: "whatever", another: "soup" }
           @factory.add_attribute(:one, "whatever")
           @factory.add_attribute(:another) { "soup" }
-          @factory.add_attribute(@attr) {}
+          @factory.add_attribute(:unimportant) {}
         end
 
         it "provides previously set attributes" do
           expect(Factory::AttributeProxy)
             .to receive(:new)
-            .with(:attributes_for, @attrs)
+            .with(an_instance_of(Factory::Strategy::AttributesFor))
+            .and_return(@proxy)
           @factory.attributes_for
         end
       end
@@ -186,6 +187,7 @@ RSpec.describe Factory do
       end
 
       it "adds the attribute with the name of the association" do
+        allow(Factory).to receive(:create)
         expect(@factory.attributes_for.key?(@name)).to be true
       end
 
