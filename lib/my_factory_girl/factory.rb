@@ -1,6 +1,7 @@
 class Factory
   @factories = {}
   attr_reader :factory_name
+  attr_reader :attributes #:nodoc:
 
   class << self
     attr_accessor :factories
@@ -11,16 +12,16 @@ class Factory
       factories[instance.factory_name] = instance
     end
 
-    def attributes_for(name, override = {})
-      factory_by_name(name).attributes_for(override)
+    def attributes_for(name, overrides = {})
+      factory_by_name(name).run_strategy(Strategy::AttributesFor, overrides)
     end
 
-    def build(name, override = {})
-      factory_by_name(name).build(override)
+    def build(name, overrides = {})
+      factory_by_name(name).run_strategy(Strategy::Build, overrides)
     end
 
-    def create(name, override = {})
-      factory_by_name(name).create(override)
+    def create(name, overrides = {})
+      factory_by_name(name).run_strategy(Strategy::Create, overrides)
     end
 
     private
@@ -63,10 +64,6 @@ class Factory
     add_attribute(name) { |a| a.association(association_factory) }
   end
 
-  def attributes_for(overrides = {})
-    run_strategy(Strategy::AttributesFor, overrides)
-  end
-
   def build(overrides = {})
     run_strategy(Strategy::Build, overrides)
   end
@@ -75,7 +72,7 @@ class Factory
     run_strategy(Strategy::Create, overrides)
   end
 
-  def run_strategy(strategy_class, overrides)
+  def run_strategy(strategy_class, overrides) #:nodoc:
     strategy = strategy_class.new(build_class)
     overrides = symbolize_keys(overrides)
     overrides.each { |attr, val| strategy.set(attr, val) }

@@ -60,11 +60,11 @@ RSpec.describe Factory do
     end
 
     it "adds an attribute using the method name when passed an undefined method" do
-      @attr = :first_name
-      @value = "Sugar"
-      @factory.send(@attr, @value)
-
-      expect(@factory.attributes_for[@attr]).to eq(@value)
+      attr = double("attribute", name: :name)
+      block = -> {}
+      allow(Factory::Attribute).to receive(:new).and_return(attr)
+      @factory.send(:name, "value", &block)
+      expect(@factory.attributes).to include(attr)
     end
 
     it "has a build class" do
@@ -83,7 +83,8 @@ RSpec.describe Factory do
     it "allows attributes to be added with string as names" do
       @factory.add_attribute("name", "value")
 
-      expect(@factory.attributes_for[:name]).to eq("value")
+      result = @factory::run_strategy(Factory::Strategy::AttributesFor, {})
+      expect(result[:name]).to eq("value")
     end
 
     it "creates a new attribute when an attribute is defined" do
@@ -143,31 +144,17 @@ RSpec.describe Factory do
       end
     end
 
-    context "when adding an attribute with a block" do
+    context "after adding an attribute with a block" do
       before do
-        @attr = :name
-        @attrs = {}
-        @proxy = double("proxy")
-        allow(Factory::AttributeProxy).to receive(:new).and_return(@proxy)
+        @factory.add_attribute(:attr) { "value" }
       end
 
-      context "when other attributes have previously been defined" do
-        before do
-          @attr = :unimportant
-          @attrs = { one: "whatever", another: "soup" }
-          @factory.add_attribute(:one, "whatever")
-          @factory.add_attribute(:another, "soup")
-          @factory.add_attribute(@attr) {}
-        end
+      it "creates an attribute proxy" do
+        expect(Factory::AttributeProxy)
+          .to receive(:new)
+          .with(an_instance_of(Factory::Strategy::AttributesFor))
 
-        it "provides the previously set attributes" do
-          expect(Factory::AttributeProxy)
-            .to receive(:new)
-            .with(an_instance_of(Factory::Strategy::AttributesFor))
-            .and_return(@proxy)
-
-          @factory.attributes_for
-        end
+        @factory.run_strategy(Factory::Strategy::AttributesFor, {})
       end
     end
 
@@ -181,7 +168,8 @@ RSpec.describe Factory do
       end
 
       it "adds an attribute with the name of the association" do
-        expect(@factory.attributes_for.key?(@name)).to be true
+        result = @factory.run_strategy(Factory::Strategy::AttributesFor, {})
+        expect(result).to have_key(@name)
       end
 
       it "creates a block that builds the association" do
@@ -196,11 +184,12 @@ RSpec.describe Factory do
         @name = :author
         @factory_name = :user
         @factory.association(@name, factory: @factory_name)
+        allow(Factory).to receive(:create)
       end
 
       it "adds the attribute with the name of the association" do
-        allow(Factory).to receive(:create)
-        expect(@factory.attributes_for.key?(@name)).to be true
+        result = @factory.run_strategy(Factory::Strategy::AttributesFor, {})
+        expect(result).to have_key(@name)
       end
 
       it "creates a block that builds the associaiton" do
@@ -217,22 +206,23 @@ RSpec.describe Factory do
       end
 
       it "returns the overriden value in the generated attributes" do
-        @factory.add_attribute(@attr, "The price is wrong :(")
+        result = @factory.run_strategy(Factory::Strategy::AttributesFor, @hash)
 
-        expect(@factory.attributes_for(@hash)[@attr]).to eq(@value)
+        expect(result[@attr]).to eq(@value)
       end
 
       it "does not call a lazy attribute block for an overriden attribute" do
         @factory.add_attribute(@attr) { flunk }
 
-        expect(@factory.attributes_for(@hash)[@attr]).to eq(@value)
+        @factory.run_strategy(Factory::Strategy::AttributesFor, @hash)
       end
 
       it "should override a symbol parameter with a string parameter" do
         @factory.add_attribute(@attr, "The price is wrong, Bob!")
         @hash = { @attr.to_s => @value }
 
-        expect(@factory.attributes_for(@hash)[@attr]).to eq(@value)
+        result = @factory.run_strategy(Factory::Strategy::AttributesFor, @hash)
+        expect(result[@attr]).to eq(@value)
       end
     end
 
@@ -240,7 +230,9 @@ RSpec.describe Factory do
       before do
         @factory.add_attribute(:test, "original")
         Factory.alias(/(.*)_alias/, '\1')
-        @result = @factory.attributes_for(test_alias: "new")
+        @result = @factory.run_strategy(
+          Factory::Strategy::AttributesFor, test_alias: "new"
+        )
       end
 
       it "it uses the passed in value for the alias" do
@@ -389,12 +381,6 @@ RSpec.describe Factory do
     end
 
     [:attributes_for, :build, :create].each do |method|
-      it "delegates the method to the factory instance" do
-        expect(@factory).to receive(method).with(@attrs)
-
-        Factory.send(method, @name, @attrs)
-      end
-
       it "raises ArgumentError when called with a non existing factory" do
         expect { Factory.send(method, :bogus) }.to raise_error(ArgumentError)
       end
@@ -406,7 +392,9 @@ RSpec.describe Factory do
     end
 
     it "calls the create method from the top level Factory() method" do
-      expect(@factory).to receive(:create).with(@attrs)
+      expect(@factory)
+        .to receive(:run_strategy)
+        .with(Factory::Strategy::Create, @attrs)
 
       Factory(@name, @attrs)
     end
