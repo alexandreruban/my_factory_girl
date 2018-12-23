@@ -141,31 +141,32 @@ RSpec.describe Factory do
         expect(@factory.run_strategy(Factory::Strategy::Build, {}))
           .to eq("result")
       end
+    end
 
-      context "when adding an attribute with a block" do
+    context "when adding an attribute with a block" do
+      before do
+        @attr = :name
+        @attrs = {}
+        @proxy = double("proxy")
+        allow(Factory::AttributeProxy).to receive(:new).and_return(@proxy)
+      end
+
+      context "when other attributes have previously been defined" do
         before do
-          @attr = :name
-          @attrs = {}
-          @proxy = double("proxy")
-          allow(Factory::AttributeProxy).to receive(:new).and_return(@proxy)
+          @attr = :unimportant
+          @attrs = { one: "whatever", another: "soup" }
+          @factory.add_attribute(:one, "whatever")
+          @factory.add_attribute(:another, "soup")
+          @factory.add_attribute(@attr) {}
         end
 
-        context "when other attributes have previously been defined" do
-          before do
-            @attrs = { one: "whatever", another: "soup" }
-            @factory.add_attribute(:one, "whatever")
-            @factory.add_attribute(:another) { "soup" }
-            @factory.add_attribute(:unimportant) {}
-          end
+        it "provides the previously set attributes" do
+          expect(Factory::AttributeProxy)
+            .to receive(:new)
+            .with(an_instance_of(Factory::Strategy::AttributesFor))
+            .and_return(@proxy)
 
-          it "provides previously set attributes" do
-            expect(Factory::AttributeProxy)
-              .to receive(:new)
-              .with(an_instance_of(Factory::Strategy::AttributesFor))
-              .and_return(@proxy)
-
-            @factory.attributes_for
-          end
+          @factory.attributes_for
         end
       end
     end
