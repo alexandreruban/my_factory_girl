@@ -75,8 +75,6 @@ class Factory
     run_strategy(Strategy::Create, overrides)
   end
 
-  private
-
   def run_strategy(strategy_class, overrides)
     strategy = strategy_class.new(build_class)
     overrides = symbolize_keys(overrides)
@@ -89,6 +87,8 @@ class Factory
     end
     strategy.result
   end
+
+  private
 
   def class_for(class_or_to_s)
     if class_or_to_s.respond_to?(:to_sym)

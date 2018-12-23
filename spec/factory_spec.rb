@@ -86,75 +86,86 @@ RSpec.describe Factory do
       expect(@factory.attributes_for[:name]).to eq("value")
     end
 
-    context "when adding an attribute with a value parameter" do
-      before do
-        @attr = :name
-        @value = "Master Yoda"
-        @factory.add_attribute(@attr, @value)
-      end
-
-      it "includes the value in the generated attributes hash" do
-        expect(@factory.attributes_for[@attr]).to eq(@value)
-      end
+    it "creates a new attribute when an attribute is defined" do
+      block = proc {}
+      attribute = double("attribute", name: :name)
+      expect(Factory::Attribute)
+        .to receive(:new)
+        .with(:name, "value", block)
+        .and_return(attribute)
+      @factory.add_attribute(:name, "value", &block)
     end
 
-    context "when adding an attribute with a block" do
+    context "after adding an attribute" do
       before do
-        @attr = :name
-        @attrs = {}
-        @proxy = double("attribute-proxy")
-        allow(Factory::AttributeProxy).to receive(:new).and_return(@proxy)
+        @attribute = double("attribute")
+        @strategy = double("strategy")
+
+        allow(@attribute).to receive(:name).and_return(:name)
+        allow(@attribute).to receive(:value).and_return("value")
+        allow(@strategy).to receive(:set)
+        allow(@strategy).to receive(:result).and_return("result")
+        allow(Factory::Attribute).to receive(:new).and_return(@attribute)
+        allow(Factory::Strategy::Build).to receive(:new).and_return(@strategy)
+
+        @factory.add_attribute(:name, "value")
       end
 
-      it "does not evaluate the block when the attribute is loaded" do
-        @factory.add_attribute(@attr) { flunk }
-      end
-
-      it "evaluates the block when the attributes are generated" do
-        called = false
-        @factory.add_attribute(@attr) { called = true }
-        @factory.attributes_for
-
-        expect(called).to be true
-      end
-
-      it "uses the value of the block as the value of the attribute" do
-        value = "Jacky Chan"
-        @factory.add_attribute(@attr) { value }
-
-        expect(@factory.attributes_for[@attr]).to eq(value)
-      end
-
-      it "builds an attribute proxy" do
-        expect(Factory::AttributeProxy)
+      it "creates the right strategy using the build class when running" do
+        expect(Factory::Strategy::Build)
           .to receive(:new)
-          .with(an_instance_of(Factory::Strategy::AttributesFor))
-        @factory.add_attribute(@attr) {}
-        @factory.attributes_for
+          .with(@factory.build_class)
+          .and_return(@strategy)
+
+        @factory.run_strategy(Factory::Strategy::Build, {})
       end
 
-      it "yields an attribute proxy to the block" do
-        yielded = nil
-        @factory.add_attribute(@attr) { |y| yielded = y }
-        @factory.attributes_for
+      it "gets the value from the attribute when running" do
+        expect(@attribute)
+          .to receive(:value)
+          .with(@strategy)
+          .and_return("value")
 
-        expect(yielded).to eq(@proxy)
+        @factory.run_strategy(Factory::Strategy::Build, {})
       end
 
-      context "when other attributes have previously been defined" do
+      it "sets the value on the strategy when running" do
+        expect(@strategy).to receive(:set).with(:name, "value")
+
+        @factory.run_strategy(Factory::Strategy::Build, {})
+      end
+
+      it "returns the value of the strategy when running" do
+        expect(@strategy).to receive(:result).with(no_args).and_return("result")
+
+        expect(@factory.run_strategy(Factory::Strategy::Build, {}))
+          .to eq("result")
+      end
+
+      context "when adding an attribute with a block" do
         before do
-          @attrs = { one: "whatever", another: "soup" }
-          @factory.add_attribute(:one, "whatever")
-          @factory.add_attribute(:another) { "soup" }
-          @factory.add_attribute(:unimportant) {}
+          @attr = :name
+          @attrs = {}
+          @proxy = double("proxy")
+          allow(Factory::AttributeProxy).to receive(:new).and_return(@proxy)
         end
 
-        it "provides previously set attributes" do
-          expect(Factory::AttributeProxy)
-            .to receive(:new)
-            .with(an_instance_of(Factory::Strategy::AttributesFor))
-            .and_return(@proxy)
-          @factory.attributes_for
+        context "when other attributes have previously been defined" do
+          before do
+            @attrs = { one: "whatever", another: "soup" }
+            @factory.add_attribute(:one, "whatever")
+            @factory.add_attribute(:another) { "soup" }
+            @factory.add_attribute(:unimportant) {}
+          end
+
+          it "provides previously set attributes" do
+            expect(Factory::AttributeProxy)
+              .to receive(:new)
+              .with(an_instance_of(Factory::Strategy::AttributesFor))
+              .and_return(@proxy)
+
+            @factory.attributes_for
+          end
         end
       end
     end
