@@ -62,8 +62,12 @@ RSpec.describe Factory do
     it "adds an attribute using the method name when passed an undefined method" do
       attr = double("attribute", name: :name)
       block = -> {}
-      allow(Factory::Attribute).to receive(:new).and_return(attr)
-      @factory.send(:name, "value", &block)
+      expect(Factory::Attribute::Static)
+        .to receive(:new)
+        .with(:name, "value")
+        .and_return(attr)
+
+      @factory.send(:name, "value")
       expect(@factory.attributes).to include(attr)
     end
 
@@ -72,7 +76,7 @@ RSpec.describe Factory do
     end
 
     it "does not allow the same attribute to be defined twice" do
-      expect { 2.times { @factory.add_attribute(:name, "John") } }
+      expect { 2.times { @factory.add_attribute(:first_name, "John") } }
         .to raise_error(Factory::AttributeDefinitionError)
     end
 
@@ -87,57 +91,66 @@ RSpec.describe Factory do
       expect(result[:name]).to eq("value")
     end
 
-    it "creates a new attribute when an attribute is defined" do
-      block = proc {}
+    it "adds a static attribute when an attribute is defined with a value" do
       attribute = double("attribute", name: :name)
-      expect(Factory::Attribute)
+      expect(Factory::Attribute::Static)
         .to receive(:new)
-        .with(:name, "value", block)
+        .with(:name, "value")
         .and_return(attribute)
-      @factory.add_attribute(:name, "value", &block)
+      @factory.add_attribute(:name, "value")
+    end
+
+    it "adds a dynamic attribute when an attribute is defined with a block" do
+      attribute = double("attribute", name: :name)
+      block = proc {}
+      expect(Factory::Attribute::Dynamic)
+        .to receive(:new)
+        .with(:name, block)
+        .and_return(attribute)
+
+      @factory.add_attribute(:name, &block)
+    end
+
+    it "raises when the attribute is defined with both a value and a block" do
+      expect { @factory.add_attribute(:name, "value") {} }
+        .to raise_error(Factory::AttributeDefinitionError)
     end
 
     context "after adding an attribute" do
       before do
-        @attribute = double("attribute")
-        @strategy = double("strategy")
+        @attribute = double("attribute", name: "name", value: "value")
+        allow(@attribute).to receive(:add_to)
+        @proxy = double("proxy", result: "result")
+        allow(@proxy).to receive(:set)
 
-        allow(@attribute).to receive(:name).and_return(:name)
-        allow(@attribute).to receive(:value).and_return("value")
-        allow(@strategy).to receive(:set)
-        allow(@strategy).to receive(:result).and_return("result")
-        allow(Factory::Attribute).to receive(:new).and_return(@attribute)
-        allow(Factory::Proxy::Build).to receive(:new).and_return(@strategy)
+        allow(Factory::Attribute::Static).to receive(:new).and_return(@attribute)
+        allow(Factory::Proxy::Build).to receive(:new).and_return(@proxy)
 
         @factory.add_attribute(:name, "value")
       end
 
-      it "creates the right strategy using the build class when running" do
+      it "creates the right proxy using the build class when running" do
         expect(Factory::Proxy::Build)
           .to receive(:new)
           .with(@factory.build_class)
-          .and_return(@strategy)
+          .and_return(@proxy)
 
         @factory.run(Factory::Proxy::Build, {})
       end
 
       it "gets the value from the attribute when running" do
-        expect(@attribute)
-          .to receive(:value)
-          .with(@strategy)
-          .and_return("value")
+        expect(@attribute).to receive(:add_to).with(@proxy)
+        @factory.run(Factory::Proxy::Build, {})
+      end
+
+      it "sets the value on the proxy when running" do
+        expect(@attribute).to receive(:add_to).with(@proxy)
 
         @factory.run(Factory::Proxy::Build, {})
       end
 
-      it "sets the value on the strategy when running" do
-        expect(@strategy).to receive(:set).with(:name, "value")
-
-        @factory.run(Factory::Proxy::Build, {})
-      end
-
-      it "returns the value of the strategy when running" do
-        expect(@strategy).to receive(:result).with(no_args).and_return("result")
+      it "returns the value of the proxy when running" do
+        expect(@proxy).to receive(:result).with(no_args).and_return("result")
 
         expect(@factory.run(Factory::Proxy::Build, {}))
           .to eq("result")
@@ -311,17 +324,7 @@ RSpec.describe Factory do
   context "Factory class" do
     before do
       @name = :user
-      @attrs = { last_name: "Override" }
-      @first_name = "Johnny"
-      @last_name = "Winter"
-      @class = User
-
-      Factory.define(@name) do |u|
-        u.first_name @first_name
-        u.last_name { @last_name }
-        u.email "jwinter@email.com"
-      end
-
+      @factory = double("factory")
       @factory = Factory.factories[@name]
     end
 
@@ -331,6 +334,7 @@ RSpec.describe Factory do
       end
 
       it "recognises either 'name' and :name for Factory.#{method}" do
+        allow(@factory).to receive(:run)
         expect { Factory.send(method, @name.to_s) }.not_to raise_error
         expect { Factory.send(method, @name) }.not_to raise_error
       end

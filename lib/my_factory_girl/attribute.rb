@@ -4,31 +4,17 @@ class Factory
 
   class Attribute
     attr_reader :name
-    attr_writer :static_value, :lazy_block
 
-    def initialize(name, static_value, lazy_block)
-      name = name.to_sym
+    def initialize(name)
+      @name = name.to_sym
 
       if name.to_s =~ /=$/
-        raise Factory::AttributeDefinitionError, "Factory girl uses" +
+        raise Factory::AttributeDefinitionError, "factory_girl uses" +
         "#{name.to_s.chop} value syntax rather than #{name} value."
       end
-
-      unless static_value.nil? || lazy_block.nil?
-        raise ArgumentError, "Both value and block given"
-      end
-
-      @name = name
-      @lazy_block = lazy_block
-      @static_value = static_value
     end
 
-    def value(proxy)
-      if @lazy_block.nil?
-        @static_value
-      else
-        @lazy_block.call(proxy)
-      end
+    def add_to(proxy)
     end
   end
 end

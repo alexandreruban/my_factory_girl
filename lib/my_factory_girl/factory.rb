@@ -43,7 +43,15 @@ class Factory
   end
 
   def add_attribute(name, value = nil, &block)
-    attribute = Attribute.new(name, value, block)
+    if block_given?
+      if value
+        raise AttributeDefinitionError, "Both value and block given"
+      else
+        attribute = Attribute::Dynamic.new(name, block)
+      end
+    else
+      attribute = Attribute::Static.new(name, value)
+    end
 
     if attribute_defined?(attribute.name)
       raise AttributeDefinitionError, "Attribute already defined: #{name}"
@@ -64,14 +72,14 @@ class Factory
     add_attribute(name) { |a| a.association(association_factory) }
   end
 
-  def run(proxy_class, overrides) #:nodoc:
+  def run(proxy_class, overrides)
     proxy = proxy_class.new(build_class)
     overrides = symbolize_keys(overrides)
     overrides.each { |attr, val| proxy.set(attr, val) }
     passed_keys = overrides.keys.map { |key| Factory.aliases_for(key) }.flatten
     @attributes.each do |attribute|
       unless passed_keys.include?(attribute.name)
-        proxy.set(attribute.name, attribute.value(proxy))
+        attribute.add_to(proxy)
       end
     end
     proxy.result

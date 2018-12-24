@@ -22,7 +22,7 @@ class Factory
     end
 
     def result
-      raise NotImplementedError, "Strategies must return a result"
+      raise NotImplementedError, "Proxies must return a result"
     end
   end
 end
