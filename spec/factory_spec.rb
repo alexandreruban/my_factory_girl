@@ -319,7 +319,7 @@ RSpec.describe Factory do
       @factory = Factory.factories[@name]
     end
 
-    [:attributes_for, :build, :create].each do |method|
+    [:attributes_for, :build, :create, :stub].each do |method|
       it "raises ArgumentError when called with a non existing factory" do
         expect { Factory.send(method, :bogus) }.to raise_error(ArgumentError)
       end
@@ -329,6 +329,15 @@ RSpec.describe Factory do
         expect { Factory.send(method, @name.to_s) }.not_to raise_error
         expect { Factory.send(method, @name) }.not_to raise_error
       end
+    end
+
+    it "uses Factory::Stub for Factory.stub" do
+      expect(@factory)
+        .to receive(:run)
+        .with(Factory::Proxy::Stub, attr: "value")
+        .and_return("result")
+
+      expect(Factory.stub(@name, attr: "value")).to eq("result")
     end
 
     it "calls the create method from the top level Factory() method" do
