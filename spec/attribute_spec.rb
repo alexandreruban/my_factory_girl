@@ -36,8 +36,7 @@ RSpec.describe Factory::Attribute do
       @attr = Factory::Attribute.new(:user, @value, nil)
     end
 
-    it "returns the value without building a proxy" do
-      expect(Factory::AttributeProxy).not_to receive(:new)
+    it "returns the static value when asked for its value" do
       expect(@attr.value(@strategy)).to eq(@value)
     end
   end
@@ -49,15 +48,10 @@ RSpec.describe Factory::Attribute do
       expect(@attr.value(@strategy)).to eq("value")
     end
 
-    it "yields the attribute proxy to the block" do
+    it "yields the passed strategy to the block" do
       @block = -> (a) { a }
       @attr = Factory::Attribute.new(:user, nil, @block)
-      proxy = double("attribute-proxy")
-      allow(Factory::AttributeProxy)
-        .to receive(:new)
-        .with(@strategy)
-        .and_return(proxy)
-      expect(@attr.value(@strategy)).to eq(proxy)
+      expect(@attr.value(@strategy)).to eq(@strategy)
     end
   end
 end

@@ -17,6 +17,17 @@ RSpec.describe Factory::Strategy::Create do
       @strategy = Factory::Strategy::Create.new(@class)
     end
 
+    it "calls Factory.create when building the association" do
+      association = "association"
+      attributes = { name: "Billy" }
+      expect(Factory)
+        .to receive(:create)
+        .with(:user, attributes)
+        .and_return(association)
+
+      expect(@strategy.association(:user, attributes)).to eq(association)
+    end
+
     context "when asked to associate with another factory" do
       it "creates the associated instance" do
         expect(Factory).to receive(:create).with(:user, {}).and_return(@association)

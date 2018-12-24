@@ -144,20 +144,6 @@ RSpec.describe Factory do
       end
     end
 
-    context "after adding an attribute with a block" do
-      before do
-        @factory.add_attribute(:attr) { "value" }
-      end
-
-      it "creates an attribute proxy" do
-        expect(Factory::AttributeProxy)
-          .to receive(:new)
-          .with(an_instance_of(Factory::Strategy::AttributesFor))
-
-        @factory.run_strategy(Factory::Strategy::AttributesFor, {})
-      end
-    end
-
     context "when adding an association without a factory name" do
       before do
         @factory = Factory.new(:post)

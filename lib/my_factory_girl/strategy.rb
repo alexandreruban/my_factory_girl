@@ -13,6 +13,14 @@ class Factory
     def associate(name, factory, attributes)
     end
 
+    def association(name, overrides = {})
+      nil
+    end
+
+    def method_missing(method, *args, &block)
+      get(method)
+    end
+
     def result
       raise NotImplementedError, "Strategies must return a result"
     end

@@ -14,6 +14,11 @@ RSpec.describe Factory::Strategy do
       expect(@strategy.get(:name)).to be_nil
     end
 
+    it "calls get for a missing method" do
+      expect(@strategy).to receive(:get).with(:name).and_return("A name")
+      expect(@strategy.name).to eq("A name")
+    end
+
     it "does nothing when asked to associate with another factory" do
       expect(@strategy.associate(:owner, :user, {})).to be_nil
     end
