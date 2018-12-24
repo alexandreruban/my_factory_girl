@@ -23,11 +23,11 @@ class Factory
       @static_value = static_value
     end
 
-    def value(strategy)
+    def value(proxy)
       if @lazy_block.nil?
         @static_value
       else
-        @lazy_block.call(strategy)
+        @lazy_block.call(proxy)
       end
     end
   end

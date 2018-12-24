@@ -2,7 +2,7 @@ require "spec_helper"
 
 RSpec.describe Factory::Attribute do
   before do
-    @strategy = double("strategy")
+    @proxy = double("proxy")
   end
 
   it "raises an error when defining an attribute writer" do
@@ -37,7 +37,7 @@ RSpec.describe Factory::Attribute do
     end
 
     it "returns the static value when asked for its value" do
-      expect(@attr.value(@strategy)).to eq(@value)
+      expect(@attr.value(@proxy)).to eq(@value)
     end
   end
 
@@ -45,13 +45,13 @@ RSpec.describe Factory::Attribute do
     it "calls the block to retrun a value" do
       @block = -> (a) { "value" }
       @attr = Factory::Attribute.new(:user, nil, @block)
-      expect(@attr.value(@strategy)).to eq("value")
+      expect(@attr.value(@proxy)).to eq("value")
     end
 
-    it "yields the passed strategy to the block" do
+    it "yields the passed proxy to the block" do
       @block = -> (a) { a }
       @attr = Factory::Attribute.new(:user, nil, @block)
-      expect(@attr.value(@strategy)).to eq(@strategy)
+      expect(@attr.value(@proxy)).to eq(@proxy)
     end
   end
 end

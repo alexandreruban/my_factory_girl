@@ -83,7 +83,7 @@ RSpec.describe Factory do
     it "allows attributes to be added with string as names" do
       @factory.add_attribute("name", "value")
 
-      result = @factory::run_strategy(Factory::Strategy::AttributesFor, {})
+      result = @factory::run(Factory::Proxy::AttributesFor, {})
       expect(result[:name]).to eq("value")
     end
 
@@ -107,18 +107,18 @@ RSpec.describe Factory do
         allow(@strategy).to receive(:set)
         allow(@strategy).to receive(:result).and_return("result")
         allow(Factory::Attribute).to receive(:new).and_return(@attribute)
-        allow(Factory::Strategy::Build).to receive(:new).and_return(@strategy)
+        allow(Factory::Proxy::Build).to receive(:new).and_return(@strategy)
 
         @factory.add_attribute(:name, "value")
       end
 
       it "creates the right strategy using the build class when running" do
-        expect(Factory::Strategy::Build)
+        expect(Factory::Proxy::Build)
           .to receive(:new)
           .with(@factory.build_class)
           .and_return(@strategy)
 
-        @factory.run_strategy(Factory::Strategy::Build, {})
+        @factory.run(Factory::Proxy::Build, {})
       end
 
       it "gets the value from the attribute when running" do
@@ -127,19 +127,19 @@ RSpec.describe Factory do
           .with(@strategy)
           .and_return("value")
 
-        @factory.run_strategy(Factory::Strategy::Build, {})
+        @factory.run(Factory::Proxy::Build, {})
       end
 
       it "sets the value on the strategy when running" do
         expect(@strategy).to receive(:set).with(:name, "value")
 
-        @factory.run_strategy(Factory::Strategy::Build, {})
+        @factory.run(Factory::Proxy::Build, {})
       end
 
       it "returns the value of the strategy when running" do
         expect(@strategy).to receive(:result).with(no_args).and_return("result")
 
-        expect(@factory.run_strategy(Factory::Strategy::Build, {}))
+        expect(@factory.run(Factory::Proxy::Build, {}))
           .to eq("result")
       end
     end
@@ -154,13 +154,13 @@ RSpec.describe Factory do
       end
 
       it "adds an attribute with the name of the association" do
-        result = @factory.run_strategy(Factory::Strategy::AttributesFor, {})
+        result = @factory.run(Factory::Proxy::AttributesFor, {})
         expect(result).to have_key(@name)
       end
 
       it "creates a block that builds the association" do
         expect(Factory).to receive(:create).with(@name, {})
-        @factory.run_strategy(Factory::Strategy::Build, {})
+        @factory.run(Factory::Proxy::Build, {})
       end
     end
 
@@ -174,13 +174,13 @@ RSpec.describe Factory do
       end
 
       it "adds the attribute with the name of the association" do
-        result = @factory.run_strategy(Factory::Strategy::AttributesFor, {})
+        result = @factory.run(Factory::Proxy::AttributesFor, {})
         expect(result).to have_key(@name)
       end
 
       it "creates a block that builds the associaiton" do
         expect(Factory).to receive(:create).with(@factory_name, {})
-        @factory.run_strategy(Factory::Strategy::Build, {})
+        @factory.run(Factory::Proxy::Build, {})
       end
     end
 
@@ -192,7 +192,7 @@ RSpec.describe Factory do
       end
 
       it "returns the overriden value in the generated attributes" do
-        result = @factory.run_strategy(Factory::Strategy::AttributesFor, @hash)
+        result = @factory.run(Factory::Proxy::AttributesFor, @hash)
 
         expect(result[@attr]).to eq(@value)
       end
@@ -200,14 +200,14 @@ RSpec.describe Factory do
       it "does not call a lazy attribute block for an overriden attribute" do
         @factory.add_attribute(@attr) { flunk }
 
-        @factory.run_strategy(Factory::Strategy::AttributesFor, @hash)
+        @factory.run(Factory::Proxy::AttributesFor, @hash)
       end
 
       it "should override a symbol parameter with a string parameter" do
         @factory.add_attribute(@attr, "The price is wrong, Bob!")
         @hash = { @attr.to_s => @value }
 
-        result = @factory.run_strategy(Factory::Strategy::AttributesFor, @hash)
+        result = @factory.run(Factory::Proxy::AttributesFor, @hash)
         expect(result[@attr]).to eq(@value)
       end
     end
@@ -216,8 +216,8 @@ RSpec.describe Factory do
       before do
         @factory.add_attribute(:test, "original")
         Factory.alias(/(.*)_alias/, '\1')
-        @result = @factory.run_strategy(
-          Factory::Strategy::AttributesFor, test_alias: "new"
+        @result = @factory.run(
+          Factory::Proxy::AttributesFor, test_alias: "new"
         )
       end
 
@@ -338,8 +338,8 @@ RSpec.describe Factory do
 
     it "calls the create method from the top level Factory() method" do
       expect(@factory)
-        .to receive(:run_strategy)
-        .with(Factory::Strategy::Create, @attrs)
+        .to receive(:run)
+        .with(Factory::Proxy::Create, @attrs)
 
       Factory(@name, @attrs)
     end

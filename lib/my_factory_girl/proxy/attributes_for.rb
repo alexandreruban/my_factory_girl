@@ -1,6 +1,6 @@
 class Factory
-  class Strategy
-    class AttributesFor < Strategy
+  class Proxy
+    class AttributesFor < Proxy
       def initialize(klass)
         @hash = {}
       end

@@ -1,5 +1,5 @@
 class Factory
-  class Strategy
+  class Proxy
     def initialize(klass)
     end
 

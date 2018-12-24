@@ -13,15 +13,15 @@ class Factory
     end
 
     def attributes_for(name, overrides = {})
-      factory_by_name(name).run_strategy(Strategy::AttributesFor, overrides)
+      factory_by_name(name).run(Proxy::AttributesFor, overrides)
     end
 
     def build(name, overrides = {})
-      factory_by_name(name).run_strategy(Strategy::Build, overrides)
+      factory_by_name(name).run(Proxy::Build, overrides)
     end
 
     def create(name, overrides = {})
-      factory_by_name(name).run_strategy(Strategy::Create, overrides)
+      factory_by_name(name).run(Proxy::Create, overrides)
     end
 
     private
@@ -64,17 +64,17 @@ class Factory
     add_attribute(name) { |a| a.association(association_factory) }
   end
 
-  def run_strategy(strategy_class, overrides) #:nodoc:
-    strategy = strategy_class.new(build_class)
+  def run(proxy_class, overrides) #:nodoc:
+    proxy = proxy_class.new(build_class)
     overrides = symbolize_keys(overrides)
-    overrides.each { |attr, val| strategy.set(attr, val) }
+    overrides.each { |attr, val| proxy.set(attr, val) }
     passed_keys = overrides.keys.map { |key| Factory.aliases_for(key) }.flatten
     @attributes.each do |attribute|
       unless passed_keys.include?(attribute.name)
-        strategy.set(attribute.name, attribute.value(strategy))
+        proxy.set(attribute.name, attribute.value(proxy))
       end
     end
-    strategy.result
+    proxy.result
   end
 
   private

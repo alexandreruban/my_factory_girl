@@ -1,9 +1,9 @@
 require "spec_helper"
 
-RSpec.describe Factory::Strategy do
+RSpec.describe Factory::Proxy do
   context "a strategy" do
     before do
-      @strategy = Factory::Strategy.new(Class.new)
+      @strategy = Factory::Proxy.new(Class.new)
     end
 
     it "does nothing when asked to set an attribute to a value" do

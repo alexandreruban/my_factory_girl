@@ -1,6 +1,6 @@
 require "spec_helper"
 
-RSpec.describe Factory::Strategy::Build do
+RSpec.describe Factory::Proxy::Build do
   context "with a class to build" do
     before do
       @class = Class.new
@@ -14,9 +14,9 @@ RSpec.describe Factory::Strategy::Build do
       allow(@instance).to receive(:owner=)
     end
 
-    context "the build strategy" do
+    context "the build proxy" do
       before do
-        @strategy = Factory::Strategy::Build.new(@class)
+        @proxy = Factory::Proxy::Build.new(@class)
       end
 
       it "calls Factory.create when building an association" do
@@ -27,28 +27,28 @@ RSpec.describe Factory::Strategy::Build do
           .with(:user, attributes)
           .and_return(association)
 
-        expect(@strategy.association(:user, attributes)).to eq(association)
+        expect(@proxy.association(:user, attributes)).to eq(association)
       end
 
       it "returns the build instance when asked for the result" do
-        expect(@strategy.result).to eq(@instance)
+        expect(@proxy.result).to eq(@instance)
       end
 
       context "when asked to associate with another factory" do
         it "creates the associated instance" do
           expect(Factory).to receive(:create).with(:user, {}).and_return(@association)
-          @strategy.associate(:owner, :user, {})
+          @proxy.associate(:owner, :user, {})
         end
 
         it "sets the associated instance" do
           expect(@instance).to receive(:owner=).with(@association)
-          @strategy.associate(:owner, :user, {})
+          @proxy.associate(:owner, :user, {})
         end
       end
 
       context "when getting an attribute" do
         before do
-          @result = @strategy.get(:attribute)
+          @result = @proxy.get(:attribute)
         end
 
         it "returns the value for that attribute" do
@@ -59,7 +59,7 @@ RSpec.describe Factory::Strategy::Build do
       context "when setting an attribute" do
         it "sets that value" do
           expect(@instance).to receive(:attribute=).with("value")
-          @strategy.set(:attribute, "value")
+          @proxy.set(:attribute, "value")
         end
       end
     end

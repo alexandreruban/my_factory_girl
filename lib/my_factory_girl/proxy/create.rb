@@ -1,5 +1,5 @@
 class Factory
-  class Strategy
+  class Proxy
     class Create < Build
       def result
         @instance.save!

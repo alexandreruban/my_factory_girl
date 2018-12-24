@@ -1,6 +1,6 @@
 class Factory
-  class Strategy
-    class Build < Strategy
+  class Proxy
+    class Build < Proxy
       def initialize(klass)
         @instance = klass.new
       end
