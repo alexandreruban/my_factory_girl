@@ -64,10 +64,6 @@ class Factory
     add_attribute(name) { |a| a.association(association_factory) }
   end
 
-  def build(overrides = {})
-    run_strategy(Strategy::Build, overrides)
-  end
-
   def create(overrides = {})
     run_strategy(Strategy::Create, overrides)
   end

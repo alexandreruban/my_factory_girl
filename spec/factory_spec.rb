@@ -174,7 +174,7 @@ RSpec.describe Factory do
 
       it "creates a block that builds the association" do
         expect(Factory).to receive(:create).with(@name, {})
-        @factory.build
+        @factory.run_strategy(Factory::Strategy::Build, {})
       end
     end
 
@@ -194,7 +194,7 @@ RSpec.describe Factory do
 
       it "creates a block that builds the associaiton" do
         expect(Factory).to receive(:create).with(@factory_name, {})
-        @factory.build
+        @factory.run_strategy(Factory::Strategy::Build, {})
       end
     end
 
@@ -279,47 +279,6 @@ RSpec.describe Factory do
 
       it "uses the specified class as the build class" do
         expect(@factory.build_class).to eq(@class)
-      end
-    end
-
-    context "with some attributes added" do
-      before do
-        @first_name = "Billy"
-        @last_name = "The kid"
-        @email = "billy@email.com"
-
-        @factory.add_attribute(:first_name, @first_name)
-        @factory.add_attribute(:last_name, @last_name)
-        @factory.add_attribute(:email, @email)
-      end
-
-      context "when building an instance" do
-        before do
-          @instance = @factory.build
-        end
-
-        should_instanciate_class
-
-        it "does not save the instance" do
-          expect(@instance).to be_a_new_record
-        end
-      end
-
-      context "when creating an instance" do
-        before do
-          @instance = @factory.create
-        end
-
-        should_instanciate_class
-
-        it "saves the instance" do
-          expect(@instance).not_to be_a_new_record
-        end
-
-        it "raises an ActiveRecord::RecordInvalid for invalid instances" do
-          expect { @factory.create(first_name: nil) }
-            .to raise_error(ActiveRecord::RecordInvalid)
-        end
       end
     end
   end
