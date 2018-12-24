@@ -9,6 +9,7 @@ class CreateSchema < ActiveRecord::Migration[5.2]
       t.string :first_name
       t.string :last_name
       t.string :email
+      t.string :username
       t.boolean :admin, default: false
     end
 

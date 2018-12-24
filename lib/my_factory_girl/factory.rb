@@ -80,6 +80,11 @@ class Factory
     @attributes << Attribute::Association.new(name, factory_name, options)
   end
 
+  def sequence(name, &block)
+    sequence = Sequence.new(&block)
+    add_attribute(name) { sequence.next }
+  end
+
   def run(proxy_class, overrides)
     proxy = proxy_class.new(build_class)
     overrides = symbolize_keys(overrides)

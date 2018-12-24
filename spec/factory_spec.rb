@@ -153,6 +153,23 @@ RSpec.describe Factory do
         .to raise_error(Factory::AttributeDefinitionError)
     end
 
+    context "adding an attribute using an inline sequence" do
+      it "creates the sequence" do
+        expect(Factory::Sequence).to receive(:new)
+        @factory.sequence(:username) {}
+      end
+
+      it "adds a dynamic attribute" do
+        attr = double("attribute", name: :name)
+        expect(Factory::Attribute::Dynamic)
+          .to receive(:new)
+          .with(:name, an_instance_of(Proc))
+          .and_return(attr)
+        @factory.sequence(:name) {}
+        expect(@factory.attributes).to include(attr)
+      end
+    end
+
     context "after adding an attribute" do
       before do
         @attribute = double("attribute", name: "name", value: "value")
