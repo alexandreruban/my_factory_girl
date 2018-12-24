@@ -97,11 +97,11 @@ RSpec.describe "Integration test" do
     end
 
     it "correctly assigns lazy, dependent attributes" do
-      expect(@stub.email).to eq("jimmy.hendrinx@email.com")
+      expect(@stub.email).to eq("billy.hendrix@example.com")
     end
 
     it "overrides attributes" do
-      expect(@stub.first_name).to eq("Bill")
+      expect(@stub.first_name).to eq("Billy")
     end
 
     it "does not assign associations" do
