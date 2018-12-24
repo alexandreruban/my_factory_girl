@@ -1,24 +1,6 @@
 require "spec_helper"
 
 RSpec.describe Factory do
-  def self.should_instanciate_class
-    it "instaciates the build class" do
-      expect(@instance).to be_a_kind_of(@class)
-    end
-
-    it "assigns the attributes on the instance" do
-      expect(@first_name).to eq(@instance.first_name)
-      expect(@last_name).to eq(@instance.last_name)
-    end
-
-    it "overrides the attributes using the passed hash" do
-      @value = "Davis"
-      @instance = @factory.build(first_name: @value)
-
-      expect(@instance.first_name).to eq(@value)
-    end
-  end
-
   context "defining a factory" do
     before do
       @factory_name = :user
@@ -111,6 +93,55 @@ RSpec.describe Factory do
       @factory.add_attribute(:name, &block)
     end
 
+    it "adds an association without a factory name or overrides" do
+      factory = Factory.new(:post)
+      name = :user
+      attr = "attribute"
+      expect(Factory::Attribute::Association)
+        .to receive(:new)
+        .with(name, name, {})
+        .and_return(attr)
+      factory.association(name)
+      expect(factory.attributes).to include(attr)
+    end
+
+    it "adds an association with overrides" do
+      factory = Factory.new(:post)
+      name = :user
+      attr = "attribute"
+      overrides = { first_name: "Ben" }
+      expect(Factory::Attribute::Association)
+        .to receive(:new)
+        .with(name, name, overrides)
+        .and_return(attr)
+      factory.association(name, overrides)
+      expect(factory.attributes).to include(attr)
+    end
+
+    it "adds an association with a factory name" do
+      factory = Factory.new(:post)
+      attr = "attribute"
+      expect(Factory::Attribute::Association)
+        .to receive(:new)
+        .with(:author, :user, {})
+        .and_return(attr)
+
+      factory.association(:author, factory: :user)
+      expect(factory.attributes).to include(attr)
+    end
+
+    it "adds an association with a factory name and overrides" do
+      factory = Factory.new(:post)
+      attr = "attribute"
+      expect(Factory::Attribute::Association)
+        .to receive(:new)
+        .with(:author, :user, first_name: "Ben")
+        .and_return(attr)
+
+      factory.association(:author, factory: :user, first_name: "Ben")
+      expect(factory.attributes).to include(attr)
+    end
+
     it "raises when the attribute is defined with both a value and a block" do
       expect { @factory.add_attribute(:name, "value") {} }
         .to raise_error(Factory::AttributeDefinitionError)
@@ -154,46 +185,6 @@ RSpec.describe Factory do
 
         expect(@factory.run(Factory::Proxy::Build, {}))
           .to eq("result")
-      end
-    end
-
-    context "when adding an association without a factory name" do
-      before do
-        @factory = Factory.new(:post)
-        @name = :user
-        @factory.association(@name)
-        allow_any_instance_of(Post).to receive(:user=)
-        allow(Factory).to receive(:create)
-      end
-
-      it "adds an attribute with the name of the association" do
-        result = @factory.run(Factory::Proxy::AttributesFor, {})
-        expect(result).to have_key(@name)
-      end
-
-      it "creates a block that builds the association" do
-        expect(Factory).to receive(:create).with(@name, {})
-        @factory.run(Factory::Proxy::Build, {})
-      end
-    end
-
-    context "when adding an association with a factory name" do
-      before do
-        @factory = Factory.new(:post)
-        @name = :author
-        @factory_name = :user
-        @factory.association(@name, factory: @factory_name)
-        allow(Factory).to receive(:create)
-      end
-
-      it "adds the attribute with the name of the association" do
-        result = @factory.run(Factory::Proxy::AttributesFor, {})
-        expect(result).to have_key(@name)
-      end
-
-      it "creates a block that builds the associaiton" do
-        expect(Factory).to receive(:create).with(@factory_name, {})
-        @factory.run(Factory::Proxy::Build, {})
       end
     end
 

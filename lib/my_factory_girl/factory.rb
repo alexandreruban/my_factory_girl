@@ -65,11 +65,8 @@ class Factory
   end
 
   def association(name, options = {})
-    name = name.to_sym
-    options = symbolize_keys(options)
-    association_factory = options[:factory] || name
-
-    add_attribute(name) { |a| a.association(association_factory) }
+    factory_name = options.delete(:factory) ||name
+    @attributes << Attribute::Association.new(name, factory_name, options)
   end
 
   def run(proxy_class, overrides)
