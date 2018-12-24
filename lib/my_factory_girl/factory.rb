@@ -1,7 +1,10 @@
 class Factory
   @factories = {}
   attr_reader :factory_name
-  attr_reader :attributes #:nodoc:
+  attr_reader :attributes
+
+  class AssociationDefinitionError < RuntimeError
+  end
 
   class << self
     attr_accessor :factories
@@ -70,6 +73,10 @@ class Factory
 
   def association(name, options = {})
     factory_name = options.delete(:factory) ||name
+    if factory_name_for(factory_name) == self.factory_name
+      raise AssociationDefinitionError, "self referencing association #{name}" +
+                                        "in factory #{self.factory_name}"
+    end
     @attributes << Attribute::Association.new(name, factory_name, options)
   end
 

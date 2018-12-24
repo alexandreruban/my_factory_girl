@@ -142,6 +142,12 @@ RSpec.describe Factory do
       expect(factory.attributes).to include(attr)
     end
 
+    it "raises for a self referencing association" do
+      factory = Factory.new(:post)
+      expect { factory.association(:parent, factory: :post) }
+        .to raise_error(Factory::AssociationDefinitionError)
+    end
+
     it "raises when the attribute is defined with both a value and a block" do
       expect { @factory.add_attribute(:name, "value") {} }
         .to raise_error(Factory::AttributeDefinitionError)
