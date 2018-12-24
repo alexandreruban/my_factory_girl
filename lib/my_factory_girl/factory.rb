@@ -24,6 +24,10 @@ class Factory
       factory_by_name(name).run(Proxy::Create, overrides)
     end
 
+    def stub(name, overrides = {})
+      factory_by_name(name).run(Proxy::Stub, overrides)
+    end
+
     private
 
     def factory_by_name(name)
