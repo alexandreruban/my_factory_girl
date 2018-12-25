@@ -335,6 +335,50 @@ RSpec.describe Factory do
     end
   end
 
+  context "defining a factory using a parent attribute" do
+    before do
+      @parent = Factory.define :object do |f|
+        f.name "Name"
+      end
+    end
+
+    it "raises ArgumentError when using a non existent factory as parent" do
+      expect { Factory.define(:child, parent: :nonexistent) {} }
+        .to raise_error(ArgumentError)
+    end
+
+    it "creates a new factory using the class of the parent" do
+      child = Factory.define(:child, parent: :object) {}
+
+      expect(child.build_class).to eq(@parent.build_class)
+    end
+
+    it "creates a new factory with the attributes of the parent" do
+      child = Factory.define(:child, parent: :object) {}
+
+      expect(child.attributes.size).to eq(1)
+      expect(child.attributes.first.name).to eq(:name)
+    end
+
+    it "allows to define additional attributes" do
+      child = Factory.define(:child, parent: :object) do |f|
+        f.email "person@email.com"
+      end
+
+      expect(child.attributes.size).to eq(2)
+    end
+
+    it "allows to override the parent attribute" do
+      child = Factory.define(:child, parent: :object) do |f|
+        f.name { "John Doe" }
+      end
+
+      expect(child.attributes.size).to eq(1)
+      expect(child.attributes.first)
+        .to be_an_instance_of(Factory::Attribute::Dynamic)
+    end
+  end
+
   context "Factory class" do
     before do
       @name = :user
