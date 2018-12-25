@@ -34,6 +34,10 @@ class Factory
       factory_by_name(name).run(Proxy::Stub, overrides)
     end
 
+    def default_strategy(name, overrides = {})
+      self.send(factory_by_name(name).default_strategy, name, overrides)
+    end
+
     private
 
     def factory_by_name(name)
@@ -54,6 +58,10 @@ class Factory
 
   def build_class
     @build_class ||= class_for(class_name)
+  end
+
+  def default_strategy
+    @options[:default_strategy] || :create
   end
 
   def add_attribute(name, value = nil, &block)
@@ -137,9 +145,16 @@ class Factory
   end
 
   def assert_valid_options(options)
-    invalid_keys = options.keys - [:class, :parent]
+    invalid_keys = options.keys - [:class, :parent, :default_strategy]
     unless invalid_keys == []
       raise ArgumentError, "Unknown arguments: #{invalid_keys.inspect}"
+    end
+    assert_valid_strategy(options[:default_strategy]) if options[:default_strategy]
+  end
+
+  def assert_valid_strategy(strategy)
+    unless Factory::Proxy.const_defined? variable_name_to_class_name(strategy)
+      raise ArgumentError, "Unknown strategy: #{strategy}"
     end
   end
 

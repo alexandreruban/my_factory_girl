@@ -12,5 +12,5 @@ require "my_factory_girl/sequence"
 require "my_factory_girl/aliases"
 
 def Factory(name, attrs = {})
-  Factory.create(name, attrs)
+  Factory.default_strategy(name, attrs)
 end

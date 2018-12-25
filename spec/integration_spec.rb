@@ -14,7 +14,7 @@ RSpec.describe "Integration test" do
       f.username "GuestUser"
     end
 
-    Factory.define Post do |f|
+    Factory.define Post, default_strategy: :attributes_for do |f|
       f.title "Test Post"
       f.association :author, factory: :user
     end
@@ -196,6 +196,12 @@ RSpec.describe "Integration test" do
       it "is not the same as the first generated value" do
         expect(@username).not_to eq(@another_username)
       end
+    end
+  end
+
+  context "a factory with a specified default strategy" do
+    it "generates instances according to the strategy" do
+      expect(Factory(:post)).to be_an_instance_of(Hash)
     end
   end
 end

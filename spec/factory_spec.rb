@@ -57,6 +57,10 @@ RSpec.describe Factory do
       expect(@factory.build_class).to eq(@class)
     end
 
+    it "has a default strategy" do
+      expect(@factory.default_strategy).to eq(:create)
+    end
+
     it "does not allow the same attribute to be defined twice" do
       expect { 2.times { @factory.add_attribute(:first_name, "John") } }
         .to raise_error(Factory::AttributeDefinitionError)
@@ -386,6 +390,15 @@ RSpec.describe Factory do
       @factory = Factory.factories[@name]
     end
 
+    it "uses the default strategy option as Factory.default_strategy" do
+      allow(@factory).to receive(:default_strategy).and_return(:create)
+      expect(@factory)
+        .to receive(:run)
+        .with(Factory::Proxy::Create, attr: "value")
+        .and_return("result")
+      expect(Factory.default_strategy(@name, attr: "value")).to eq("result")
+    end
+
     [:attributes_for, :build, :create, :stub].each do |method|
       it "raises ArgumentError when called with a non existing factory" do
         expect { Factory.send(method, :bogus) }.to raise_error(ArgumentError)
@@ -413,6 +426,18 @@ RSpec.describe Factory do
         .with(Factory::Proxy::Create, @attrs)
 
       Factory(@name, @attrs)
+    end
+  end
+
+  context "defining a factory with a default strategy parameter" do
+    it "raises ArgumentError when trying to use a non existent factory" do
+      expect { Factory.define(:object, default_strategy: :nonexistent) {} }
+        .to raise_error(ArgumentError)
+    end
+
+    it "creates a new factory with a specified default strategy" do
+      factory = Factory.define(:object, default_strategy: :stub) {}
+      expect(factory.default_strategy).to eq(:stub)
     end
   end
 end
