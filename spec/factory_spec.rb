@@ -173,6 +173,57 @@ RSpec.describe Factory do
         .to raise_error(Factory::AttributeDefinitionError)
     end
 
+    describe "adding a callback" do
+      it "adds a callback attribute when the after_build attribute is defined" do
+        callback = double("after_build callback")
+        allow(Factory::Attribute::Callback)
+          .to receive(:new)
+          .with(:after_build, an_instance_of(Proc))
+          .and_return(callback)
+        @factory.after_build {}
+
+        expect(@factory.attributes).to include(callback)
+      end
+
+      it "adds a callback attribute when the after_create attribute is defined" do
+        callback = double("after_create callback")
+        allow(Factory::Attribute::Callback)
+          .to receive(:new)
+          .with(:after_build, an_instance_of(Proc))
+          .and_return(callback)
+        @factory.after_build {}
+
+        expect(@factory.attributes).to include(callback)
+      end
+
+      it "adds a callback attribute when the after_create attribute is defined" do
+        callback = double("after_stub callback")
+        allow(Factory::Attribute::Callback)
+          .to receive(:new)
+          .with(:after_stub, an_instance_of(Proc))
+          .and_return(callback)
+        @factory.after_stub {}
+
+        expect(@factory.attributes).to include(callback)
+      end
+
+      it "adds a callback attribute when defining a callback" do
+        callback = double("after_create callback")
+        allow(Factory::Attribute::Callback)
+          .to receive(:new)
+          .with(:after_create, an_instance_of(Proc))
+          .and_return(callback)
+        @factory.callback(:after_create) {}
+
+        expect(@factory.attributes).to include(callback)
+      end
+
+      it "raises InvalidCallbackNameError when defining an invalid callback" do
+        expect { @factory.callback(:invalid) {} }
+          .to raise_error(Factory::InvalidCallbackNameError)
+      end
+    end
+
     context "adding an attribute using an inline sequence" do
       it "creates the sequence" do
         expect(Factory::Sequence).to receive(:new)

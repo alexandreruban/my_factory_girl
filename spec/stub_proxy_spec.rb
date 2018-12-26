@@ -45,6 +45,20 @@ RSpec.describe Factory::Proxy::Stub do
     end
   end
 
+  context "when asked for the result" do
+    it "returns the actual instance when asked for the result" do
+      expect(@stub.result).to eq(@instance)
+    end
+
+    it "runs the after_stub callback when asked for the result" do
+      @spy = double("spy")
+      expect(@spy).to receive(:foo)
+      @stub.add_callback(:after_stub, proc { @spy.foo })
+
+      @stub.result
+    end
+  end
+
   context "with an existing attribute" do
     before do
       @value = "value"

@@ -8,6 +8,7 @@ require "my_factory_girl/attribute"
 require "my_factory_girl/attribute/static"
 require "my_factory_girl/attribute/dynamic"
 require "my_factory_girl/attribute/association"
+require "my_factory_girl/attribute/callback"
 require "my_factory_girl/sequence"
 require "my_factory_girl/aliases"
 

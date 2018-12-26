@@ -34,6 +34,14 @@ RSpec.describe Factory::Proxy::Build do
         expect(@proxy.result).to eq(@instance)
       end
 
+      it "runs the after_build callback when retrieving the result" do
+        spy = double("spy")
+        @proxy.add_callback(:after_build, proc { spy.foo })
+        expect(spy).to receive(:foo)
+
+        @proxy.result
+      end
+
       context "when asked to associate with another factory" do
         it "creates the associated instance" do
           expect(Factory).to receive(:create).with(:user, {}).and_return(@association)

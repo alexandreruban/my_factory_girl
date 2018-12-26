@@ -27,6 +27,17 @@ RSpec.describe "Integration test" do
       f.admin true
     end
 
+    Factory.define :user_with_callbacks, parent: :user do |f|
+      f.after_stub { |u| u.first_name = "Stuby" }
+      f.after_build { |u| u.first_name = "Buildy" }
+      f.after_create { |u| u.last_name = "Createy" }
+    end
+
+    Factory.define :business do |f|
+      f.name "Supplier of Awsome"
+      f.association :owner, factory: :user
+    end
+
     Factory.sequence :email do |n|
       "somebody#{n}@example.com"
     end
@@ -219,6 +230,24 @@ RSpec.describe "Integration test" do
   context "a factory with a specified default strategy" do
     it "generates instances according to the strategy" do
       expect(Factory(:post)).to be_an_instance_of(Hash)
+    end
+  end
+
+  context "an instance with callbacks" do
+    it "runs the after_stub callback when stubbing" do
+      @user = Factory.stub(:user_with_callbacks)
+      expect(@user.first_name).to eq("Stuby")
+    end
+
+    it "runs the after build callback when building" do
+      @user = Factory.build(:user_with_callbacks)
+      expect(@user.first_name).to eq("Buildy")
+    end
+
+    it "runs both the after_build and after_create callbacks when creating" do
+      @user = Factory.create(:user_with_callbacks)
+      expect(@user.first_name).to eq("Buildy")
+      expect(@user.last_name).to eq("Createy")
     end
   end
 

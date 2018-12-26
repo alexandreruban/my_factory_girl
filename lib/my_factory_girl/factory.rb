@@ -6,6 +6,9 @@ class Factory
   class AssociationDefinitionError < RuntimeError
   end
 
+  class InvalidCallbackNameError < RuntimeError
+  end
+
   class << self
     attr_accessor :factories
 
@@ -109,6 +112,25 @@ class Factory
       end
     end
     proxy.result
+  end
+
+  def after_build(&block)
+    callback(:after_build, &block)
+  end
+
+  def after_create(&block)
+    callback(:after_create, &block)
+  end
+
+  def after_stub(&block)
+    callback(:after_stub, &block)
+  end
+
+  def callback(name, &block)
+    unless [:after_build, :after_create, :after_stub].include?(name.to_sym)
+      raise InvalidCallbackNameError, "#{name} is not a valid callback"
+    end
+    @attributes << Attribute::Callback.new(name.to_sym, block)
   end
 
   def inherit_from(parent)

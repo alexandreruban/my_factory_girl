@@ -28,6 +28,17 @@ RSpec.describe Factory::Proxy::Create do
       expect(@proxy.association(:user, attributes)).to eq(association)
     end
 
+    it "runs after_build and after_create callback when retrieving the result" do
+      @build_spy = double("build_spy")
+      @create_spy = double("create_spy")
+      @proxy.add_callback(:after_build, proc { @build_spy.foo })
+      @proxy.add_callback(:after_create, proc { @create_spy.foo })
+      expect(@build_spy).to receive(:foo)
+      expect(@create_spy).to receive(:foo)
+
+      @proxy.result
+    end
+
     context "when asked to associate with another factory" do
       it "creates the associated instance" do
         expect(Factory).to receive(:create).with(:user, {}).and_return(@association)

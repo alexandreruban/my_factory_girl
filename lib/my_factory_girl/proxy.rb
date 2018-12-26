@@ -1,5 +1,7 @@
 class Factory
   class Proxy
+    attr_reader :callbacks
+
     def initialize(klass)
     end
 
@@ -15,6 +17,20 @@ class Factory
 
     def association(name, overrides = {})
       nil
+    end
+
+    def add_callback(name, block)
+      @callbacks ||= {}
+      @callbacks[name] ||= []
+      @callbacks[name] << block
+    end
+
+    def run_callbacks(name)
+      if @callbacks && @callbacks[name]
+        @callbacks[name].each do |block|
+          block.arity.zero? ? block.call : block.call(@instance)
+        end
+      end
     end
 
     def method_missing(method, *args, &block)
