@@ -35,6 +35,13 @@ RSpec.describe Factory::Proxy::Stub do
       expect(@proxy).to be_a_kind_of(Object)
     end
 
+    context "setting an attribute" do
+      it "defines attributes even if attribute= is defined" do
+        @proxy.set("attribute", nil)
+        expect { @proxy.set("age", 18) }.not_to raise_error
+      end
+    end
+
     context "after setting an attribute" do
       before do
         @proxy.set(:attribute, "value")
