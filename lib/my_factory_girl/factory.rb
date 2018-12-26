@@ -38,8 +38,6 @@ class Factory
       self.send(factory_by_name(name).default_strategy, name, overrides)
     end
 
-    private
-
     def factory_by_name(name)
       factories[name.to_sym] or raise ArgumentError.new("No such factory: #{name.to_s}")
     end

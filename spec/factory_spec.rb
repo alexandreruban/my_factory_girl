@@ -28,6 +28,12 @@ RSpec.describe Factory do
 
       expect(yielded).to eq(@factory)
     end
+
+    it "allows that factory to be found by name" do
+      factory = Factory.define(@factory_name) {}
+
+      expect(Factory.factory_by_name(@factory_name)).to eq(factory)
+    end
   end
 
   context "a factory" do
