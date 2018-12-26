@@ -95,7 +95,7 @@ RSpec.describe "Integration test" do
     end
   end
 
-  context "a generated mock instance" do
+  context "a generated stub instance" do
     before do
       @stub = Factory.stub(:user, first_name: "Billy")
     end
@@ -114,8 +114,21 @@ RSpec.describe "Integration test" do
       expect(@stub.first_name).to eq("Billy")
     end
 
-    it "does not assign associations" do
-      expect(Factory.stub(:post).author).to be_nil
+    it "assigns associations" do
+      expect(Factory.stub(:post).author).not_to be_nil
+    end
+
+    it "has an id" do
+      expect(@stub.id).to be > 0
+    end
+
+    it "has an unique id" do
+      @other_stub = Factory.stub(:user)
+      expect(@stub.id).not_to eq(@other_stub.id)
+    end
+
+    it "is not considered as a new record" do
+      expect(@stub).not_to be_a_new_record
     end
   end
 

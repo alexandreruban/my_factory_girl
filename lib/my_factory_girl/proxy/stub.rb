@@ -1,29 +1,48 @@
 class Factory
   class Proxy
     class Stub < Proxy
+      @@next_id = 1000
+
       def initialize(klass)
-        @mock = Object.new
+        @stub = klass.new
+        @stub.id = next_id
+        @stub.instance_eval do
+          def new_record?
+            id.nil?
+          end
+
+          def connection
+            raise "stubbed models are not allowed to access the database"
+          end
+
+          def reload
+            raise "stubbed models are not allowed to access the database"
+          end
+        end
+      end
+
+      def next_id
+        @@next_id += 1
       end
 
       def get(attribute)
-        @mock.send(attribute)
+        @stub.send(attribute)
       end
 
       def set(attribute, value)
-        unless @mock.respond_to?("#{attribute}=")
-          class << @mock
-            self
-          end.send(:attr_accessor, attribute)
-        end
-        @mock.send("#{attribute}=", value)
+        @stub.send("#{attribute}=", value)
       end
 
       def associate(name, factory, attributes)
-        set(name, nil)
+        set(name, Factory.stub(factory, attributes))
+      end
+
+      def association(factory, overrides = {})
+        Factory.stub(factory, overrides)
       end
 
       def result
-        @mock
+        @stub
       end
     end
   end

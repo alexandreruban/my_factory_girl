@@ -1,59 +1,65 @@
 require "spec_helper"
 
 RSpec.describe Factory::Proxy::Stub do
-  context "the stub proxy" do
+  before do
+    @class = double("class")
+    @instance = double("instance")
+    allow(@class).to receive(:new).and_return(@instance)
+    allow(@instance).to receive(:id).and_return(42)
+    allow(@instance).to receive(:id=)
+    allow(@instance).to receive(:reload) { @instance.connection.reload }
+
+    @stub = Factory::Proxy::Stub.new(@class)
+  end
+
+  it "is not a new record" do
+    expect(@stub.result).not_to be_a_new_record
+  end
+
+  it "is not able to connect to the database" do
+    expect { @stub.result.reload }.to raise_error(RuntimeError)
+  end
+
+  context "when a user factory exists" do
     before do
-      @proxy = Factory::Proxy::Stub.new(@class)
+      @user = double("user")
+      allow(Factory).to receive(:stub).with(:user, {}).and_return(@user)
     end
 
     context "when asked to associate with another factory" do
       before do
-        allow(Factory).to receive(:create)
-        @proxy.associate(:owner, :user, {})
+        allow(@instance).to receive(:owner).and_return(@user)
+        allow(@stub).to receive(:set).with(:owner, @user)
+
+        @stub.associate(:owner, :user, {})
       end
 
-      it "does not set a value for the association" do
-        expect(@proxy.owner).to be_nil
-      end
-    end
-
-    it "returns nil when building an association" do
-      expect(@proxy.association(:user)).to be_nil
-    end
-
-    it "does not call Factory.create when building an association" do
-      expect(Factory).not_to receive(:create)
-      @proxy.association(:user)
-    end
-
-    it "returns nil when building an association" do
-      @proxy.set(:association, "x")
-      expect(@proxy.association(:user)).to be_nil
-    end
-
-    it "returns a mock object when asked for the result" do
-      expect(@proxy).to be_a_kind_of(Object)
-    end
-
-    context "setting an attribute" do
-      it "defines attributes even if attribute= is defined" do
-        @proxy.set("attribute", nil)
-        expect { @proxy.set("age", 18) }.not_to raise_error
-      end
-    end
-
-    context "after setting an attribute" do
-      before do
-        @proxy.set(:attribute, "value")
+      it "sets a value for the association" do
+        expect(Factory).not_to receive(:create)
+        expect(@stub.association(:user)).to eq(@user)
       end
 
-      it "adds a stub to the resulting object" do
-        expect(@proxy.attribute).to eq("value")
+      it "returns the actual instance when asked for the result" do
+        expect(@stub.result.owner).to eq(@user)
       end
+    end
+  end
 
-      it "returns that value when asked for that attribute" do
-        expect(@proxy.get(:attribute)).to eq("value")
-      end
+  context "with an existing attribute" do
+    before do
+      @value = "value"
+      allow(@instance).to receive(:attribute=).with(@value)
+      allow(@instance).to receive(:attribute).and_return(@value)
+
+      @stub.set(:attribute, @value)
+    end
+
+    it "returns the resulting object" do
+      expect(@stub.attribute).to eq(@value)
+    end
+
+    it "returns that value when asked for the attribute" do
+      expect(@stub.get(:attribute)).to eq(@value)
     end
   end
 end
