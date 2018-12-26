@@ -455,6 +455,22 @@ RSpec.describe Factory do
       expect(child.attributes.first)
         .to be_an_instance_of(Factory::Attribute::Dynamic)
     end
+
+    it "inherits all callbacks" do
+      Factory.define(:child, parent: :object) do |f|
+        f.after_stub { |o| o.name = "Stuby"}
+      end
+
+      grandchild = Factory.define(:grandchild, parent: :child) do |f|
+        f.after_stub { |o| o.name = "#{o.name} McStuby"}
+      end
+
+      expect(grandchild.attributes.size).to eq(3)
+      expect(grandchild.attributes[0])
+        .to be_an_instance_of(Factory::Attribute::Callback)
+      expect(grandchild.attributes[1])
+        .to be_an_instance_of(Factory::Attribute::Callback)
+    end
   end
 
   context "Factory class" do

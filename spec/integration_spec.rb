@@ -33,6 +33,10 @@ RSpec.describe "Integration test" do
       f.after_create { |u| u.last_name = "Createy" }
     end
 
+    Factory.define :user_with_inherited_callbacks, parent: :user_with_callbacks do |f|
+      f.callback(:after_stub) { |u| u.last_name = "Double-Stuby" }
+    end
+
     Factory.define :business do |f|
       f.name "Supplier of Awsome"
       f.association :owner, factory: :user
@@ -248,6 +252,12 @@ RSpec.describe "Integration test" do
       @user = Factory.create(:user_with_callbacks)
       expect(@user.first_name).to eq("Buildy")
       expect(@user.last_name).to eq("Createy")
+    end
+
+    it "runs both the after_stub callback on the factory and the inherited callback" do
+      @user = Factory.stub(:user_with_inherited_callbacks)
+      expect(@user.first_name).to eq("Stuby")
+      expect(@user.last_name).to eq("Double-Stuby")
     end
   end
 

@@ -165,7 +165,9 @@ class Factory
   end
 
   def attribute_defined?(name)
-    !@attributes.detect { |attribute| attribute.name == name }.nil?
+    !@attributes.detect do |attribute|
+      attribute.name == name && !attribute.is_a?(Factory::Attribute::Callback)
+    end.nil?
   end
 
   def assert_valid_options(options)
