@@ -10,6 +10,8 @@ RSpec.describe Factory do
       allow(Factory).to receive(:new) { @factory }
     end
 
+    after { Factory.factories.clear }
+
     it "creates a new factory using the specified factory name and options" do
       Factory.define(@factory_name, @options) { |f| }
 
@@ -34,6 +36,11 @@ RSpec.describe Factory do
 
       expect(Factory.factory_by_name(@factory_name)).to eq(factory)
     end
+
+    it "does not allow a duplicate factory definition" do
+      expect { 2.times { Factory.define(:user) { |f| } } }
+        .to raise_error(Factory::DuplicateDefinitionError)
+    end
   end
 
   context "a factory" do
@@ -42,6 +49,8 @@ RSpec.describe Factory do
       @class = User
       @factory = Factory.new(@factory_name)
     end
+
+    after { Factory.factories.clear }
 
     it "has a factory name" do
       expect(@factory.factory_name).to eq(@factory_name)
@@ -173,7 +182,7 @@ RSpec.describe Factory do
         .to raise_error(Factory::AttributeDefinitionError)
     end
 
-    describe "adding a callback" do
+    context "adding a callback" do
       it "adds a callback attribute when the after_build attribute is defined" do
         callback = double("after_build callback")
         allow(Factory::Attribute::Callback)
@@ -413,6 +422,8 @@ RSpec.describe Factory do
       end
     end
 
+    after { Factory.factories.clear }
+
     it "raises ArgumentError when using a non existent factory as parent" do
       expect { Factory.define(:child, parent: :nonexistent) {} }
         .to raise_error(ArgumentError)
@@ -477,8 +488,10 @@ RSpec.describe Factory do
     before do
       @name = :user
       @factory = double("factory")
-      @factory = Factory.factories[@name]
+      Factory.factories[@name] = @factory
     end
+
+    after { Factory.factories.clear }
 
     it "uses the default strategy option as Factory.default_strategy" do
       allow(@factory).to receive(:default_strategy).and_return(:create)
@@ -508,14 +521,6 @@ RSpec.describe Factory do
         .and_return("result")
 
       expect(Factory.stub(@name, attr: "value")).to eq("result")
-    end
-
-    it "calls the create method from the top level Factory() method" do
-      expect(@factory)
-        .to receive(:run)
-        .with(Factory::Proxy::Create, @attrs)
-
-      Factory(@name, @attrs)
     end
   end
 

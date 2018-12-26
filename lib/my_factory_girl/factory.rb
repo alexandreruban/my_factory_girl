@@ -9,15 +9,24 @@ class Factory
   class InvalidCallbackNameError < RuntimeError
   end
 
+  class DuplicateDefinitionError < RuntimeError
+  end
+
   class << self
     attr_accessor :factories
 
     def define(name, options = {})
       instance = Factory.new(name, options)
       yield(instance)
+
       if parent = options.delete(:parent)
         instance.inherit_from(factory_by_name(parent))
       end
+
+      if self.factories[instance.factory_name]
+        raise DuplicateDefinitionError, "Factory already defined: #{name}"
+      end
+
       factories[instance.factory_name] = instance
     end
 

@@ -51,6 +51,8 @@ RSpec.describe "Integration test" do
     end
   end
 
+  after { Factory.factories.clear }
+
   context "a generated attribute hash" do
     before do
       @attrs = Factory.attributes_for(:user, first_name: "Bill")

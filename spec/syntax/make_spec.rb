@@ -10,9 +10,7 @@ RSpec.describe Factory::Syntax::Make do
     end
   end
 
-  after do
-    Factory.factories.clear
-  end
+  after { Factory.factories.clear }
 
   context "after making an instance" do
     before do

@@ -11,9 +11,7 @@ RSpec.describe Factory::Syntax::Generate do
       end
     end
 
-    after do
-      Factory.factories.clear
-    end
+    after { Factory.factories.clear }
 
     it "does not raise an error when generating an invalid instance" do
       expect { User.generate(first_name: nil) }.not_to raise_error
