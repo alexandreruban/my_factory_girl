@@ -103,6 +103,16 @@ RSpec.describe Factory do
       @factory.add_attribute(:name, &block)
     end
 
+    it "returns associations" do
+      factory = Factory.new(:post)
+      factory.association(:author)
+      factory.association(:editor)
+      factory.associations.each do |association|
+        expect(association).to be_an_instance_of(Factory::Attribute::Association)
+      end
+      expect(factory.associations.size).to eq(2)
+    end
+
     it "adds an association without a factory name or overrides" do
       factory = Factory.new(:post)
       name = :user

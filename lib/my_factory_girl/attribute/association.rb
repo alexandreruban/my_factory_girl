@@ -1,6 +1,8 @@
 class Factory
   class Attribute
     class Association < Attribute
+      attr_reader :factory
+
       def initialize(name, factory, overrides)
         super(name)
         @factory = factory

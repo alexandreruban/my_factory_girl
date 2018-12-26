@@ -120,6 +120,10 @@ class Factory
     end
   end
 
+  def associations
+    attributes.select { |attr| attr.is_a?(Attribute::Association) }
+  end
+
   private
 
   def class_for(class_or_to_s)
