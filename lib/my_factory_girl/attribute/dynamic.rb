@@ -7,7 +7,9 @@ class Factory
       end
 
       def add_to(proxy)
-        proxy.set(name, @block.call(proxy))
+        value = @block.call(proxy)
+        raise SequenceAbuseError if Factory::Sequence === value
+        proxy.set(name, value)
       end
     end
   end

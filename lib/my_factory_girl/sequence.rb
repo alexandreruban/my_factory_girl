@@ -1,4 +1,7 @@
 class Factory
+  # Raised when calling Factory.sequence from a dynamic attribute block
+  class SequenceAbuseError < StandardError; end
+
   @sequences = {}
 
   class Sequence

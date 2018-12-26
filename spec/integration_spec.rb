@@ -30,6 +30,10 @@ RSpec.describe "Integration test" do
     Factory.sequence :email do |n|
       "somebody#{n}@example.com"
     end
+
+    Factory.define :sequence_abuser, class: User do |f|
+      f.first_name { Factory.sequence(:email) }
+    end
   end
 
   context "a generated attribute hash" do
@@ -203,5 +207,10 @@ RSpec.describe "Integration test" do
     it "generates instances according to the strategy" do
       expect(Factory(:post)).to be_an_instance_of(Hash)
     end
+  end
+
+  it "raises Factory::SequenceAbuseError" do
+    expect { Factory(:sequence_abuser) }
+      .to raise_error(Factory::SequenceAbuseError)
   end
 end
