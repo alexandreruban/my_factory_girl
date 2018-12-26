@@ -357,6 +357,13 @@ RSpec.describe Factory do
       expect(child.build_class).to eq(@parent.build_class)
     end
 
+    it "creates a new factory while overriding the parents class" do
+      class Other; end
+
+      child = Factory.define(:child, parent: :object, class: Other) {}
+      expect(child.build_class).to eq(Other)
+    end
+
     it "creates a new factory with the attributes of the parent" do
       child = Factory.define(:child, parent: :object) {}
 
