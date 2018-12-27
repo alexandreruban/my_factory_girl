@@ -15,39 +15,13 @@ class Factory
   class << self
     attr_accessor :factories
 
-    def define(name, options = {})
-      instance = Factory.new(name, options)
-      yield(instance)
-
-      if parent = options.delete(:parent)
-        instance.inherit_from(factory_by_name(parent))
-      end
-
-      if self.factories[instance.factory_name]
+    def register_factory(factory)
+      name = factory.factory_name
+      if self.factories[name]
         raise DuplicateDefinitionError, "Factory already defined: #{name}"
       end
 
-      factories[instance.factory_name] = instance
-    end
-
-    def attributes_for(name, overrides = {})
-      factory_by_name(name).run(Proxy::AttributesFor, overrides)
-    end
-
-    def build(name, overrides = {})
-      factory_by_name(name).run(Proxy::Build, overrides)
-    end
-
-    def create(name, overrides = {})
-      factory_by_name(name).run(Proxy::Create, overrides)
-    end
-
-    def stub(name, overrides = {})
-      factory_by_name(name).run(Proxy::Stub, overrides)
-    end
-
-    def default_strategy(name, overrides = {})
-      self.send(factory_by_name(name).default_strategy, name, overrides)
+      factories[name] = factory
     end
 
     def factory_by_name(name)
@@ -74,40 +48,16 @@ class Factory
     @options[:default_strategy] || :create
   end
 
-  def add_attribute(name, value = nil, &block)
-    if block_given?
-      if value
-        raise AttributeDefinitionError, "Both value and block given"
-      else
-        attribute = Attribute::Dynamic.new(name, block)
-      end
-    else
-      attribute = Attribute::Static.new(name, value)
-    end
-
-    if attribute_defined?(attribute.name)
+  def define_attribute(attribute)
+    name = attribute.name
+    # TODO move this checks in Attribute
+    if attribute_defined?(name)
       raise AttributeDefinitionError, "Attribute already defined: #{name}"
     end
-
-    @attributes << attribute
-  end
-
-  def method_missing(name, *args, &block)
-    add_attribute(name, *args, &block)
-  end
-
-  def association(name, options = {})
-    factory_name = options.delete(:factory) ||name
-    if factory_name_for(factory_name) == self.factory_name
-      raise AssociationDefinitionError, "self referencing association #{name}" +
-                                        "in factory #{self.factory_name}"
+    if attribute.respond_to?(:factory) && attribute.factory == self.factory_name
+      raise AssociationDefinitionError, "Self-referencing association '#{name}'"
     end
-    @attributes << Attribute::Association.new(name, factory_name, options)
-  end
-
-  def sequence(name, &block)
-    sequence = Sequence.new(&block)
-    add_attribute(name) { sequence.next }
+    @attributes << attribute
   end
 
   def run(proxy_class, overrides)
@@ -123,19 +73,7 @@ class Factory
     proxy.result
   end
 
-  def after_build(&block)
-    callback(:after_build, &block)
-  end
-
-  def after_create(&block)
-    callback(:after_create, &block)
-  end
-
-  def after_stub(&block)
-    callback(:after_stub, &block)
-  end
-
-  def callback(name, &block)
+  def add_callback(name, &block)
     unless [:after_build, :after_create, :after_stub].include?(name.to_sym)
       raise InvalidCallbackNameError, "#{name} is not a valid callback"
     end

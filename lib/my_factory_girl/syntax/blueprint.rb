@@ -9,7 +9,8 @@ class Factory
         module ClassMethods
           def blueprint(&block)
             instance = Factory.new(name.underscore, class: self)
-            instance.instance_eval(&block)
+            proxy = Factory::DefinitionProxy.new(instance)
+            proxy.instance_eval(&block)
             Factory.factories[instance.factory_name] = instance
           end
         end
