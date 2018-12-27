@@ -484,6 +484,36 @@ RSpec.describe Factory do
     end
   end
 
+  context "when defining a child factory without setting default strategy" do
+    before do
+      @parent = Factory.define(:object, default_strategy: :stub) {}
+      @child = Factory.define(:child, parent: :object) {}
+    end
+
+    after { Factory.factories.clear }
+
+    it "inherits the default strategy from its parent" do
+      expect(@child.default_strategy).to eq(:stub)
+    end
+  end
+
+  context "when defining a child factory with a default strategy" do
+    before do
+      @parent = Factory.define(:object, default_strategy: :stub) {}
+      @child = Factory.define(
+        :child,
+        parent: :object,
+        default_strategy: :build
+      ) {}
+    end
+
+    after { Factory.factories.clear }
+
+    it "should not inherit the default strategy from its parent" do
+      expect(@child.default_strategy).to eq(:build)
+    end
+  end
+
   context "a factory for a namespaces class" do
     before do
       @name = :settings

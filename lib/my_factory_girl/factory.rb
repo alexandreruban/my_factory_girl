@@ -144,6 +144,7 @@ class Factory
 
   def inherit_from(parent)
     @options[:class] ||= parent.class_name
+    @options[:default_strategy] ||= parent.default_strategy
     parent.attributes.each do |attribute|
       unless attribute_defined?(attribute.name)
         @attributes << attribute.clone
