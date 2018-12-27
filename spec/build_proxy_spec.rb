@@ -1,75 +1,83 @@
 require "spec_helper"
 
 RSpec.describe Factory::Proxy::Build do
-  context "with a class to build" do
-    before do
-      @class = Class.new
-      @instance = double("build-instance")
-      @association = double("associated-instance")
+  before do
+    @class = Class.new
+    @instance = double("build-instance")
 
-      allow(@class).to receive(:new).and_return(@instance)
-      allow(@instance).to receive(:attribute).and_return("value")
-      allow(Factory).to receive(:create).and_return(@association)
-      allow(@instance).to receive(:attribute=)
-      allow(@instance).to receive(:owner=)
+    allow(@class).to receive(:new).and_return(@instance)
+    allow(@instance).to receive(:attribute).and_return("value")
+    allow(@instance).to receive(:attribute=)
+    allow(@instance).to receive(:owner=)
+
+    @proxy = Factory::Proxy::Build.new(@class)
+  end
+
+  it "shoud instanciate the class" do
+    expect(@class).to have_received(:new)
+  end
+
+  context "when asked to associate with another factory" do
+    before do
+      @association = double("associated instance")
+      @associated_factory = double("associated factory", run: @association)
+      @overrides = { attr: "value" }
+      allow(Factory).to receive(:factory_by_name).and_return(@associated_factory)
+      @proxy.associate(:owner, :user, @overrides)
     end
 
-    context "the build proxy" do
-      before do
-        @proxy = Factory::Proxy::Build.new(@class)
-      end
+    it "creates the associated instance" do
+      expect(@associated_factory)
+        .to have_received(:run)
+        .with(Factory::Proxy::Create, @overrides)
+    end
 
-      it "calls Factory.create when building an association" do
-        association = "association"
-        attributes = { name: "Billy" }
-        expect(Factory)
-          .to receive(:create)
-          .with(:user, attributes)
-          .and_return(association)
+    it "sets the associated instance" do
+      expect(@instance)
+        .to have_received(:owner=)
+        .with(@association)
+    end
+  end
 
-        expect(@proxy.association(:user, attributes)).to eq(association)
-      end
+  it "runs create when building an association" do
+    association = double("associated instance")
+    associated_factory = double("associated factory", run: association)
+    allow(Factory).to receive(:factory_by_name).and_return(associated_factory)
+    overrides = { attr: "value" }
+    expect(@proxy.association(:user, overrides)).to eq(association)
+    expect(associated_factory)
+      .to have_received(:run)
+      .with(Factory::Proxy::Create, overrides)
+  end
 
-      it "returns the build instance when asked for the result" do
-        expect(@proxy.result).to eq(@instance)
-      end
+  it "returns the built instance when asked for the result" do
+    expect(@proxy.result).to eq(@instance)
+  end
 
-      it "runs the after_build callback when retrieving the result" do
-        spy = double("spy")
-        @proxy.add_callback(:after_build, proc { spy.foo })
-        expect(spy).to receive(:foo)
+  it "runs the after build callback when retrieving the result" do
+    spy = double("spy")
+    @proxy.add_callback(:after_build, proc { spy.foo })
+    expect(spy).to receive(:foo)
 
-        @proxy.result
-      end
+    @proxy.result
+  end
 
-      context "when asked to associate with another factory" do
-        it "creates the associated instance" do
-          expect(Factory).to receive(:create).with(:user, {}).and_return(@association)
-          @proxy.associate(:owner, :user, {})
-        end
+  context "when getting an attribute" do
+    before { @result = @proxy.get(:attribute) }
 
-        it "sets the associated instance" do
-          expect(@instance).to receive(:owner=).with(@association)
-          @proxy.associate(:owner, :user, {})
-        end
-      end
+    it "asks the build class for the value" do
+      expect(@instance).to have_received(:attribute)
+    end
 
-      context "when getting an attribute" do
-        before do
-          @result = @proxy.get(:attribute)
-        end
+    it "returns the value for that attribute" do
+      expect(@result).to eq("value")
+    end
+  end
 
-        it "returns the value for that attribute" do
-          expect(@result).to eq("value")
-        end
-      end
-
-      context "when setting an attribute" do
-        it "sets that value" do
-          expect(@instance).to receive(:attribute=).with("value")
-          @proxy.set(:attribute, "value")
-        end
-      end
+  context "when setting an attribute" do
+    it "sets that value" do
+      @proxy.set(:attribute, "value")
+      expect(@instance).to have_received(:attribute=).with("value")
     end
   end
 end

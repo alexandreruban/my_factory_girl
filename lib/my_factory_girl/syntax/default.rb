@@ -31,3 +31,7 @@ class Factory
     end
   end
 end
+
+def Factory(name, attrs = {})
+  Factory.default_strategy(name, attrs)
+end

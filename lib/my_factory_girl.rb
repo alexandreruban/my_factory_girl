@@ -13,7 +13,3 @@ require "my_factory_girl/sequence"
 require "my_factory_girl/aliases"
 require "my_factory_girl/definition_proxy"
 require "my_factory_girl/syntax/default"
-
-def Factory(name, attrs = {})
-  Factory.default_strategy(name, attrs)
-end

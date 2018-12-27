@@ -8,7 +8,8 @@ class Factory
 
         module ClassMethods
           def make(overrides = {})
-            Factory.create(name.underscore, overrides)
+            factory = Factory.factory_by_name(name.underscore)
+            factory.run(Proxy::Create, overrides)
           end
         end
       end

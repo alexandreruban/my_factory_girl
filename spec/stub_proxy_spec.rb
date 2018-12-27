@@ -23,13 +23,20 @@ RSpec.describe Factory::Proxy::Stub do
   context "when a user factory exists" do
     before do
       @user = double("user")
-      allow(Factory).to receive(:stub).with(:user, {}).and_return(@user)
+      @associated_factory = double("associated factory")
+      allow(Factory)
+        .to receive(:factory_by_name)
+        .and_return(@associated_factory)
     end
 
     context "when asked to associate with another factory" do
       before do
         allow(@instance).to receive(:owner).and_return(@user)
         allow(@stub).to receive(:set).with(:owner, @user)
+        allow(@associated_factory)
+          .to receive(:run)
+          .with(Factory::Proxy::Stub, {})
+          .and_return(@user)
 
         @stub.associate(:owner, :user, {})
       end

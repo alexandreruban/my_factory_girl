@@ -20,13 +20,13 @@ class Factory
     attr_accessor :sequences
 
     def sequence(name, &block)
-      sequences[name] = Sequence.new(&block)
+      self.sequences[name] = Sequence.new(&block)
     end
 
     def next(sequence)
       raise "No such sequence: #{sequence}" unless sequences.key?(sequence)
 
-      sequences[sequence].next
+      self.sequences[sequence].next
     end
   end
 end
