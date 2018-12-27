@@ -44,3 +44,8 @@ class Business < ActiveRecord::Base
 
   validates :name, :owner_id, presence: true
 end
+
+module Admin
+  class Settings
+  end
+end

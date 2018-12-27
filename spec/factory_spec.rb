@@ -484,6 +484,25 @@ RSpec.describe Factory do
     end
   end
 
+  context "a factory for a namespaces class" do
+    before do
+      @name = :settings
+      @class = Admin::Settings
+    end
+
+    after { Factory.factories.clear }
+
+    it "builds a namespaced class passed by a string" do
+      factory = Factory.define(@name.to_s, class: @class.name) {}
+      expect(factory.build_class).to eq(@class)
+    end
+
+    it "builds Admin::Settings class form Admin::Settings string" do
+      factory = Factory.define(@name.to_s, class: @class.name.underscore) {}
+      expect(factory.build_class).to eq(@class)
+    end
+  end
+
   context "Factory class" do
     before do
       @name = :user
