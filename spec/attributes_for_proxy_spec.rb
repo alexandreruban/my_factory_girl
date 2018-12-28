@@ -1,9 +1,9 @@
 require "spec_helper"
 
-RSpec.describe Factory::Proxy::AttributesFor do
+RSpec.describe FactoryGirl::Proxy::AttributesFor do
   context "the build proxy" do
     before do
-      @proxy = Factory::Proxy::AttributesFor.new(@class)
+      @proxy = FactoryGirl::Proxy::AttributesFor.new(@class)
     end
 
     it "returns a hash when asked for the result" do

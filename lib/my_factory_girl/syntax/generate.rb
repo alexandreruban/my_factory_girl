@@ -1,4 +1,4 @@
-class Factory
+module FactoryGirl
   module Syntax
     module Generate
       module ActiveRecord
@@ -8,7 +8,7 @@ class Factory
 
         module ClassMethods
           def generate(overrides = {}, &block)
-            factory = Factory.factory_by_name(name.underscore)
+            factory = FactoryGirl.factory_by_name(name.underscore)
             instance = factory.run(Proxy::Build, overrides)
             instance.save
             yield(instance) if block_given?
@@ -16,14 +16,14 @@ class Factory
           end
 
           def generate!(overrides = {}, &block)
-            factory = Factory.factory_by_name(name.underscore)
+            factory = FactoryGirl.factory_by_name(name.underscore)
             instance = factory.run(Proxy::Create, overrides)
             yield(instance) if block_given?
             instance
           end
 
           def spawn(overrides = {}, &block)
-            factory = Factory.factory_by_name(name.underscore)
+            factory = FactoryGirl.factory_by_name(name.underscore)
             instance = factory.run(Proxy::Build, overrides)
             yield(instance) if block_given?
             instance
@@ -34,4 +34,4 @@ class Factory
   end
 end
 
-ActiveRecord::Base.send(:include, Factory::Syntax::Generate::ActiveRecord)
+ActiveRecord::Base.send(:include, FactoryGirl::Syntax::Generate::ActiveRecord)

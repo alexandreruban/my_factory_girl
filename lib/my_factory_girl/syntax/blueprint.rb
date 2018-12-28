@@ -1,4 +1,4 @@
-class Factory
+module FactoryGirl
   module Syntax
     module Blueprint
       module ActiveRecord
@@ -9,9 +9,9 @@ class Factory
         module ClassMethods
           def blueprint(&block)
             instance = Factory.new(name.underscore, class: self)
-            proxy = Factory::DefinitionProxy.new(instance)
+            proxy = FactoryGirl::DefinitionProxy.new(instance)
             proxy.instance_eval(&block)
-            Factory.factories[instance.factory_name] = instance
+            FactoryGirl.factories[instance.factory_name] = instance
           end
         end
       end
@@ -19,4 +19,4 @@ class Factory
   end
 end
 
-ActiveRecord::Base.send(:include, Factory::Syntax::Blueprint::ActiveRecord)
+ActiveRecord::Base.send(:include, FactoryGirl::Syntax::Blueprint::ActiveRecord)

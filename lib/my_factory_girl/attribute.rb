@@ -1,4 +1,4 @@
-class Factory
+module FactoryGirl
   class AttributeDefinitionError < RuntimeError
   end
 
@@ -9,7 +9,7 @@ class Factory
       @name = name.to_sym
 
       if name.to_s =~ /=$/
-        raise Factory::AttributeDefinitionError, "factory_girl uses" +
+        raise FactoryGirl::AttributeDefinitionError, "factory_girl uses" +
         "#{name.to_s.chop} value syntax rather than #{name} value."
       end
     end

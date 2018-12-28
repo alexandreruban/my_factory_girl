@@ -1,7 +1,7 @@
 require "spec_helper"
 require "my_factory_girl/syntax/blueprint"
 
-RSpec.describe Factory::Syntax::Blueprint do
+RSpec.describe FactoryGirl::Syntax::Blueprint do
   context "a blueprint" do
     before do
       Factory.sequence(:email) { |n| "somebody#{n}@email.com"}
@@ -13,8 +13,8 @@ RSpec.describe Factory::Syntax::Blueprint do
     end
 
     after do
-      Factory.factories.clear
-      Factory.sequences.clear
+      FactoryGirl.factories.clear
+      FactoryGirl.sequences.clear
     end
 
     context "after making an instance" do

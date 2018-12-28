@@ -1,4 +1,4 @@
-class Factory
+module FactoryGirl
   class Attribute
     class Association < Attribute
       attr_reader :factory

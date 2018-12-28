@@ -1,12 +1,12 @@
-class Factory
+module FactoryGirl
   module Syntax
     module Sham
       module Sham
         def self.method_missing(name, &block)
           if block_given?
-            Factory.sequences[name] = Sequence.new(&block)
+            FactoryGirl.sequences[name] = Sequence.new(&block)
           else
-            Factory.sequences[name].next
+            FactoryGirl.sequences[name].next
           end
         end
 
@@ -19,4 +19,4 @@ class Factory
   end
 end
 
-include Factory::Syntax::Sham
+include FactoryGirl::Syntax::Sham

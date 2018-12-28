@@ -1,4 +1,4 @@
-class Factory
+module FactoryGirl
   class DefinitionProxy
     def initialize(factory)
       @factory = factory

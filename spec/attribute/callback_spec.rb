@@ -1,10 +1,10 @@
 require "spec_helper"
 
-RSpec.describe Factory::Attribute::Callback do
+RSpec.describe FactoryGirl::Attribute::Callback do
   before do
     @name = :after_create
     @block = proc { "block" }
-    @attr = Factory::Attribute::Callback.new(@name, @block)
+    @attr = FactoryGirl::Attribute::Callback.new(@name, @block)
   end
 
   it "has a name" do
@@ -18,6 +18,6 @@ RSpec.describe Factory::Attribute::Callback do
   end
 
   it "converts names to symbols" do
-    expect(Factory::Attribute::Callback.new("name", @block).name).to eq(:name)
+    expect(FactoryGirl::Attribute::Callback.new("name", @block).name).to eq(:name)
   end
 end

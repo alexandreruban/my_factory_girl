@@ -1,6 +1,6 @@
 require "spec_helper"
 
-RSpec.describe Factory::Proxy::Stub do
+RSpec.describe FactoryGirl::Proxy::Stub do
   before do
     @class = double("class")
     @instance = double("instance")
@@ -9,7 +9,7 @@ RSpec.describe Factory::Proxy::Stub do
     allow(@instance).to receive(:id=)
     allow(@instance).to receive(:reload) { @instance.connection.reload }
 
-    @stub = Factory::Proxy::Stub.new(@class)
+    @stub = FactoryGirl::Proxy::Stub.new(@class)
   end
 
   it "is not a new record" do
@@ -24,7 +24,7 @@ RSpec.describe Factory::Proxy::Stub do
     before do
       @user = double("user")
       @associated_factory = double("associated factory")
-      allow(Factory)
+      allow(FactoryGirl)
         .to receive(:factory_by_name)
         .and_return(@associated_factory)
     end
@@ -35,7 +35,7 @@ RSpec.describe Factory::Proxy::Stub do
         allow(@stub).to receive(:set).with(:owner, @user)
         allow(@associated_factory)
           .to receive(:run)
-          .with(Factory::Proxy::Stub, {})
+          .with(FactoryGirl::Proxy::Stub, {})
           .and_return(@user)
 
         @stub.associate(:owner, :user, {})

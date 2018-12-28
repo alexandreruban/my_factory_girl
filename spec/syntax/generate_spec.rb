@@ -1,7 +1,7 @@
 require "spec_helper"
 require "my_factory_girl/syntax/generate"
 
-RSpec.describe Factory::Syntax::Generate do
+RSpec.describe FactoryGirl::Syntax::Generate do
   context "a factory" do
     before do
       Factory.define :user do |f|
@@ -11,7 +11,7 @@ RSpec.describe Factory::Syntax::Generate do
       end
     end
 
-    after { Factory.factories.clear }
+    after { FactoryGirl.factories.clear }
 
     it "does not raise an error when generating an invalid instance" do
       expect { User.generate(first_name: nil) }.not_to raise_error

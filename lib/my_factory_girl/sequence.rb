@@ -1,8 +1,13 @@
-class Factory
-  # Raised when calling Factory.sequence from a dynamic attribute block
-  class SequenceAbuseError < StandardError; end
-
+module FactoryGirl
   @sequences = {}
+
+  class << self
+    attr_accessor :sequences
+  end
+
+  # Raised when calling Factory.sequence from a dynamic attribute block
+  class SequenceAbuseError < StandardError
+  end
 
   class Sequence
     def initialize(&proc)
@@ -13,20 +18,6 @@ class Factory
     def next
       @value += 1
       @proc.call(@value)
-    end
-  end
-
-  class << self
-    attr_accessor :sequences
-
-    def sequence(name, &block)
-      self.sequences[name] = Sequence.new(&block)
-    end
-
-    def next(sequence)
-      raise "No such sequence: #{sequence}" unless sequences.key?(sequence)
-
-      self.sequences[sequence].next
     end
   end
 end

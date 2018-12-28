@@ -1,4 +1,4 @@
-class Factory
+module FactoryGirl
   @aliases = [
     [/(.*)_id/, '\1'],
     [/(.*)/, '\1_id'],
@@ -6,10 +6,6 @@ class Factory
 
   class << self
     attr_accessor :aliases
-
-    def alias(pattern, replace)
-      aliases << [pattern, replace]
-    end
 
     def aliases_for(attribute)
       aliases.map do |params|

@@ -1,7 +1,7 @@
 require "spec_helper"
 require "my_factory_girl/syntax/sham"
 
-RSpec.describe Factory::Syntax::Sham do
+RSpec.describe FactoryGirl::Syntax::Sham do
   context "a factory" do
     before do
       Sham.name { "Name" }
@@ -15,8 +15,8 @@ RSpec.describe Factory::Syntax::Sham do
     end
 
     after do
-      Factory.factories.clear
-      Factory.sequences.clear
+      FactoryGirl.factories.clear
+      FactoryGirl.sequences.clear
     end
 
     context "after making up an instance" do

@@ -1,4 +1,4 @@
-class Factory
+module FactoryGirl
   class Proxy
     attr_reader :callbacks
 

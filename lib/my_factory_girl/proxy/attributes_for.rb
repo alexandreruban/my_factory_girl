@@ -1,4 +1,4 @@
-class Factory
+module FactoryGirl
   class Proxy
     class AttributesFor < Proxy
       def initialize(klass)

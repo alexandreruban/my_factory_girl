@@ -1,7 +1,7 @@
 require "spec_helper"
 require "my_factory_girl/syntax/make"
 
-RSpec.describe Factory::Syntax::Make do
+RSpec.describe FactoryGirl::Syntax::Make do
   before do
     Factory.define :user do |f|
       f.first_name "Bill"
@@ -10,7 +10,7 @@ RSpec.describe Factory::Syntax::Make do
     end
   end
 
-  after { Factory.factories.clear }
+  after { FactoryGirl.factories.clear }
 
   context "after making an instance" do
     before do

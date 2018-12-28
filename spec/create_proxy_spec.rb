@@ -1,6 +1,6 @@
 require "spec_helper"
 
-RSpec.describe Factory::Proxy::Create do
+RSpec.describe FactoryGirl::Proxy::Create do
   before do
     @class = Class.new
     @instance = double("built-instance")
@@ -11,7 +11,7 @@ RSpec.describe Factory::Proxy::Create do
     allow(@instance).to receive(:owner=)
     allow(@instance).to receive(:save!)
 
-    @proxy = Factory::Proxy::Create.new(@class)
+    @proxy = FactoryGirl::Proxy::Create.new(@class)
   end
 
   it "instanciates the class" do
@@ -22,7 +22,7 @@ RSpec.describe Factory::Proxy::Create do
     before do
       @association = double("associated instance")
       @associated_factory = double("associated factory", run: @association)
-      allow(Factory).to receive(:factory_by_name).and_return(@associated_factory)
+      allow(FactoryGirl).to receive(:factory_by_name).and_return(@associated_factory)
       @overrides = { attr: "value" }
       @proxy.associate(:owner, :user, @overrides)
     end
@@ -30,7 +30,7 @@ RSpec.describe Factory::Proxy::Create do
     it "creates the associated instance" do
       expect(@associated_factory)
         .to have_received(:run)
-        .with(Factory::Proxy::Create, @overrides)
+        .with(FactoryGirl::Proxy::Create, @overrides)
     end
 
     it "sets the associated instance" do
@@ -41,12 +41,12 @@ RSpec.describe Factory::Proxy::Create do
   it "runs create when building the result" do
     association = double("associated instance")
     associated_factory = double("associated factory", run: association)
-    allow(Factory).to receive(:factory_by_name).and_return(associated_factory)
+    allow(FactoryGirl).to receive(:factory_by_name).and_return(associated_factory)
     overrides = { attr: "value" }
     expect(@proxy.association(:user, overrides)).to eq(association)
     expect(associated_factory)
       .to have_received(:run)
-      .with(Factory::Proxy::Create, overrides)
+      .with(FactoryGirl::Proxy::Create, overrides)
   end
 
   context "when asked for the result" do

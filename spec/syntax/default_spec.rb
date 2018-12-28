@@ -11,8 +11,8 @@ RSpec.describe "Default syntax" do
   end
 
   after do
-    Factory.factories.clear
-    Factory.sequences.clear
+    FactoryGirl.factories.clear
+    FactoryGirl.sequences.clear
   end
 
   context "after making an instance" do
@@ -36,12 +36,12 @@ end
 
 RSpec.describe Factory, "given a parent factory" do
   before do
-    @parent = Factory.new(:object)
-    @parent.define_attribute(Factory::Attribute::Static.new(:name, "value"))
-    Factory.register_factory(@parent)
+    @parent = FactoryGirl::Factory.new(:object)
+    @parent.define_attribute(FactoryGirl::Attribute::Static.new(:name, "value"))
+    FactoryGirl.register_factory(@parent)
   end
 
-  after { Factory.factories.clear }
+  after { FactoryGirl.factories.clear }
 
   it "raises ArgumentError when trying to use a non existent factory as parent" do
     expect { Factory.define(:child, parent: :non_existent) {} }
@@ -56,14 +56,14 @@ RSpec.describe "defining a factory" do
     @proxy = double("proxy")
     allow(@factory).to receive(:factory_name).and_return(@name)
     @options = { class: "magic" }
-    allow(Factory).to receive(:new).and_return(@factory)
-    allow(Factory::DefinitionProxy).to receive(:new).and_return(@proxy)
+    allow(FactoryGirl::Factory).to receive(:new).and_return(@factory)
+    allow(FactoryGirl::DefinitionProxy).to receive(:new).and_return(@proxy)
   end
 
-  after { Factory.factories.clear }
+  after { FactoryGirl.factories.clear }
 
   it "creates a new factory using the specified name and options" do
-    expect(Factory).to receive(:new).with(@name, @options)
+    expect(FactoryGirl::Factory).to receive(:new).with(@name, @options)
     Factory.define(@name, @options) {}
   end
 
@@ -77,7 +77,7 @@ RSpec.describe "defining a factory" do
 
   it "allows a factory to be found by name" do
     Factory.define(@name) {}
-    expect(Factory.factory_by_name(@name)).to eq(@factory)
+    expect(FactoryGirl.factory_by_name(@name)).to eq(@factory)
   end
 end
 
@@ -85,15 +85,15 @@ RSpec.describe "after defining a factory" do
   before do
     @name = :user
     @factory = double("factory")
-    Factory.factories[@name] = @factory
+    FactoryGirl.factories[@name] = @factory
   end
 
-  after { Factory.factories.clear }
+  after { FactoryGirl.factories.clear }
 
   it "uses Proxy::AttributesFor for Factory.attributes_for" do
     expect(@factory)
       .to receive(:run)
-      .with(Factory::Proxy::AttributesFor, attr: "value")
+      .with(FactoryGirl::Proxy::AttributesFor, attr: "value")
       .and_return("result")
 
     expect(Factory.attributes_for(@name, attr: "value")).to eq("result")
@@ -102,7 +102,7 @@ RSpec.describe "after defining a factory" do
   it "uses Proxy::Build for Factory.build" do
     expect(@factory)
       .to receive(:run)
-      .with(Factory::Proxy::Build, attr: "value")
+      .with(FactoryGirl::Proxy::Build, attr: "value")
       .and_return("result")
 
     expect(Factory.build(@name, attr: "value")).to eq("result")
@@ -111,7 +111,7 @@ RSpec.describe "after defining a factory" do
   it "uses Proxy::Create for Factory.create" do
     expect(@factory)
       .to receive(:run)
-      .with(Factory::Proxy::Create, attr: "value")
+      .with(FactoryGirl::Proxy::Create, attr: "value")
       .and_return("result")
 
     expect(Factory.create(@name, attr: "value")).to eq("result")
@@ -120,7 +120,7 @@ RSpec.describe "after defining a factory" do
   it "uses Proxy::Stub for Factory.stub" do
     expect(@factory)
       .to receive(:run)
-      .with(Factory::Proxy::Stub, attr: "value")
+      .with(FactoryGirl::Proxy::Stub, attr: "value")
       .and_return("result")
 
     expect(Factory.stub(@name, attr: "value")).to eq("result")
@@ -130,7 +130,7 @@ RSpec.describe "after defining a factory" do
     expect(@factory).to receive(:default_strategy).and_return(:build)
     expect(@factory)
       .to receive(:run)
-      .with(Factory::Proxy::Build, attr: "value")
+      .with(FactoryGirl::Proxy::Build, attr: "value")
       .and_return("result")
 
     expect(Factory.default_strategy(@name, attr: "value")).to eq("result")
@@ -140,7 +140,7 @@ RSpec.describe "after defining a factory" do
     expect(@factory).to receive(:default_strategy).and_return(:stub)
     expect(@factory)
       .to receive(:run)
-      .with(Factory::Proxy::Stub, attr: "value")
+      .with(FactoryGirl::Proxy::Stub, attr: "value")
       .and_return("result")
     expect(Factory(@name, attr: "value")).to eq("result")
   end
@@ -156,5 +156,25 @@ RSpec.describe "after defining a factory" do
       expect { Factory.send(method, @name.to_s) }.not_to raise_error
       expect { Factory.send(method, @name.to_sym) }.not_to raise_error
     end
+  end
+end
+
+RSpec.describe "defining a sequence" do
+  before do
+    @sequence = double("sequence")
+    @name = :count
+    allow(FactoryGirl::Sequence) .to receive(:new).and_return(@sequence)
+  end
+
+  it "creates a new sequence" do
+    expect(FactoryGirl::Sequence).to receive(:new).with(no_args).and_return(@sequence)
+    Factory.sequence(@name)
+  end
+
+  it "uses the supplied block as the sequence generator" do
+    allow(FactoryGirl::Sequence).to receive(:new).and_yield(1)
+    yielded = false
+    Factory.sequence(@name) { |n| yielded = true }
+    expect(yielded).to be true
   end
 end

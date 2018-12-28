@@ -1,9 +1,9 @@
 require "spec_helper"
 
-RSpec.describe Factory::Sequence do
+RSpec.describe FactoryGirl::Sequence do
   context "a sequence" do
     before do
-      @sequence = Factory::Sequence.new { |n| "=#{n}"}
+      @sequence = FactoryGirl::Sequence.new { |n| "=#{n}"}
     end
 
     it "starts with the value of 1" do
@@ -21,26 +21,6 @@ RSpec.describe Factory::Sequence do
     end
   end
 
-  context "defining a sequence" do
-    before do
-      @sequence = double("sequence")
-      @name = :count
-      allow(Factory::Sequence) .to receive(:new).and_return(@sequence)
-    end
-
-    it "creates a new sequence" do
-      expect(Factory::Sequence).to receive(:new).with(no_args).and_return(@sequence)
-      Factory.sequence(@name)
-    end
-
-    it "uses the supplied block as the sequence generator" do
-      allow(Factory::Sequence).to receive(:new).and_yield(1)
-      yielded = false
-      Factory.sequence(@name) { |n| yielded = true }
-      expect(yielded).to be true
-    end
-  end
-
   context "after defining a sequence" do
     before do
       @sequence = double("sequence")
@@ -48,7 +28,7 @@ RSpec.describe Factory::Sequence do
       @value = "1 2 5"
 
       allow(@sequence).to receive(:next).and_return(@value)
-      allow(Factory::Sequence).to receive(:new).and_return(@sequence)
+      allow(FactoryGirl::Sequence).to receive(:new).and_return(@sequence)
 
       Factory.sequence(@name) {}
     end

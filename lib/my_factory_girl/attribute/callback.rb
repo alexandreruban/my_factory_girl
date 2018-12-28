@@ -1,4 +1,4 @@
-class Factory
+module FactoryGirl
   class Attribute
     class Callback < Attribute
       def initialize(name, block)

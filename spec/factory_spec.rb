@@ -6,16 +6,16 @@ RSpec.describe Factory, "registering a factory" do
     @factory = double("factory", factory_name: @name)
   end
 
-  after { Factory.factories.clear }
+  after { FactoryGirl.factories.clear }
 
   it "should add the factory to the list of factories" do
-     Factory.register_factory(@factory)
-     expect(Factory.factory_by_name(@name)).to eq(@factory)
+     FactoryGirl.register_factory(@factory)
+     expect(FactoryGirl.factory_by_name(@name)).to eq(@factory)
    end
 
   it "does not allow a duplicate factory definition" do
     expect { 2.times { Factory.define(:user) { |f| } } }
-      .to raise_error(Factory::DuplicateDefinitionError)
+      .to raise_error(FactoryGirl::DuplicateDefinitionError)
   end
 end
 
@@ -23,10 +23,10 @@ RSpec.describe Factory do
   before do
     @factory_name = :user
     @class = User
-    @factory = Factory.new(@factory_name)
+    @factory = FactoryGirl::Factory.new(@factory_name)
   end
 
-  after { Factory.factories.clear }
+  after { FactoryGirl.factories.clear }
 
   it "has a factory name" do
     expect(@factory.factory_name).to eq(@factory_name)
@@ -47,7 +47,7 @@ RSpec.describe Factory do
   context "when defined with a custom class" do
     before do
       @class = User
-      @factory = Factory.new(:author, class: @class)
+      @factory = FactoryGirl::Factory.new(:author, class: @class)
     end
 
     it "uses the specified class as the build class" do
@@ -59,7 +59,7 @@ RSpec.describe Factory do
     before do
       @class = ArgumentError
       @name = :argument_error
-      @factory = Factory.new(@class)
+      @factory = FactoryGirl::Factory.new(@class)
     end
 
     it "guesses the factory name from the class" do
@@ -74,7 +74,7 @@ RSpec.describe Factory do
   context "when defined with a custom class" do
     before do
       @class = ArgumentError
-      @factory = Factory.new(:author, class: :argument_error)
+      @factory = FactoryGirl::Factory.new(:author, class: :argument_error)
     end
 
     it "uses the specified class as the build class" do
@@ -87,7 +87,7 @@ RSpec.describe "a factory with a name ending in s" do
   before do
     @name = :business
     @class = Business
-    @factory = Factory.new(@name)
+    @factory = FactoryGirl::Factory.new(@name)
   end
 
   it "has a factory name" do
@@ -102,7 +102,7 @@ end
 RSpec.describe "a factory with a string name" do
   before do
     @name = :user
-    @factory = Factory.new(@name.to_s) {}
+    @factory = FactoryGirl::Factory.new(@name.to_s) {}
   end
 
   it "converts the string to a symbol" do
@@ -112,10 +112,11 @@ end
 
 RSpec.describe "a factory defined with a string name" do
   before do
-    Factory.factories = {}
     @name = :user
     @factory = Factory.define(@name.to_s) {}
   end
+
+  after { FactoryGirl.factories.clear }
 
   it "converts the string to a symbol" do
     expect(@factory.factory_name).to eq(@name)
@@ -129,7 +130,7 @@ RSpec.describe "defining a factory using a parent attribute" do
     end
   end
 
-  after { Factory.factories.clear }
+  after { FactoryGirl.factories.clear }
 
   it "raises ArgumentError when using a non existent factory as parent" do
     expect { Factory.define(:child, parent: :nonexistent) {} }
@@ -171,7 +172,7 @@ RSpec.describe "defining a factory using a parent attribute" do
 
     expect(child.attributes.size).to eq(1)
     expect(child.attributes.first)
-      .to be_an_instance_of(Factory::Attribute::Dynamic)
+      .to be_an_instance_of(FactoryGirl::Attribute::Dynamic)
   end
 
   it "inherits all callbacks" do
@@ -185,9 +186,9 @@ RSpec.describe "defining a factory using a parent attribute" do
 
     expect(grandchild.attributes.size).to eq(3)
     expect(grandchild.attributes[0])
-      .to be_an_instance_of(Factory::Attribute::Callback)
+      .to be_an_instance_of(FactoryGirl::Attribute::Callback)
     expect(grandchild.attributes[1])
-      .to be_an_instance_of(Factory::Attribute::Callback)
+      .to be_an_instance_of(FactoryGirl::Attribute::Callback)
   end
 end
 
@@ -197,7 +198,7 @@ RSpec.describe "when defining a child factory without setting default strategy" 
     @child = Factory.define(:child, parent: :object) {}
   end
 
-  after { Factory.factories.clear }
+  after { FactoryGirl.factories.clear }
 
   it "inherits the default strategy from its parent" do
     expect(@child.default_strategy).to eq(:stub)
@@ -214,7 +215,7 @@ RSpec.describe "when defining a child factory with a default strategy" do
     ) {}
   end
 
-  after { Factory.factories.clear }
+  after { FactoryGirl.factories.clear }
 
   it "should not inherit the default strategy from its parent" do
     expect(@child.default_strategy).to eq(:build)
@@ -227,7 +228,7 @@ RSpec.describe "a factory for a namespaces class" do
     @class = Admin::Settings
   end
 
-  after { Factory.factories.clear }
+  after { FactoryGirl.factories.clear }
 
   it "builds a namespaced class passed by a string" do
     factory = Factory.define(@name.to_s, class: @class.name) {}
@@ -244,16 +245,16 @@ RSpec.describe "Factory class" do
   before do
     @name = :user
     @factory = double("factory")
-    Factory.factories[@name] = @factory
+    FactoryGirl.factories[@name] = @factory
   end
 
-  after { Factory.factories.clear }
+  after { FactoryGirl.factories.clear }
 
   it "uses the default strategy option as Factory.default_strategy" do
     allow(@factory).to receive(:default_strategy).and_return(:create)
     expect(@factory)
       .to receive(:run)
-      .with(Factory::Proxy::Create, attr: "value")
+      .with(FactoryGirl::Proxy::Create, attr: "value")
       .and_return("result")
     expect(Factory.default_strategy(@name, attr: "value")).to eq("result")
   end
@@ -270,10 +271,10 @@ RSpec.describe "Factory class" do
     end
   end
 
-  it "uses Factory::Stub for Factory.stub" do
+  it "uses FactoryGirl::Stub for Factory.stub" do
     expect(@factory)
       .to receive(:run)
-      .with(Factory::Proxy::Stub, attr: "value")
+      .with(FactoryGirl::Proxy::Stub, attr: "value")
       .and_return("result")
 
     expect(Factory.stub(@name, attr: "value")).to eq("result")

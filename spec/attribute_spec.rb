@@ -1,19 +1,19 @@
 require "spec_helper"
 
-RSpec.describe Factory::Attribute do
+RSpec.describe FactoryGirl::Attribute do
   it "raises an error when defining an attribute writer" do
-    expect { Factory::Attribute.new(:content=) }
-      .to raise_error(Factory::AttributeDefinitionError)
+    expect { FactoryGirl::Attribute.new(:content=) }
+      .to raise_error(FactoryGirl::AttributeDefinitionError)
   end
 
   it "converts names to symbols" do
-    expect(Factory::Attribute.new("name").name).to eq(:name)
+    expect(FactoryGirl::Attribute.new("name").name).to eq(:name)
   end
 
   context "an attribute" do
     before do
       @name = :user
-      @attr = Factory::Attribute.new(@name)
+      @attr = FactoryGirl::Attribute.new(@name)
     end
 
     it "has a name" do

@@ -1,11 +1,11 @@
 require "spec_helper"
 
-RSpec.describe Factory::Attribute::Static do
+RSpec.describe FactoryGirl::Attribute::Static do
   context "a static attribute" do
     before do
       @name = :first_name
       @value = "John"
-      @attr = Factory::Attribute::Static.new(@name, @value)
+      @attr = FactoryGirl::Attribute::Static.new(@name, @value)
     end
 
     it "has a name" do
@@ -19,12 +19,12 @@ RSpec.describe Factory::Attribute::Static do
     end
 
     it "raises an error when defining an attribute writer" do
-      expect { Factory::Attribute::Static.new("test=", nil) }
-        .to raise_error(Factory::AttributeDefinitionError)
+      expect { FactoryGirl::Attribute::Static.new("test=", nil) }
+        .to raise_error(FactoryGirl::AttributeDefinitionError)
     end
 
     it "converts names to symbols" do
-      expect(Factory::Attribute::Static.new("name", "value").name).to eq(:name)
+      expect(FactoryGirl::Attribute::Static.new("name", "value").name).to eq(:name)
     end
   end
 end

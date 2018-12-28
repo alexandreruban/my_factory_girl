@@ -51,7 +51,7 @@ RSpec.describe "Integration test" do
     end
   end
 
-  after { Factory.factories.clear }
+  after { FactoryGirl.factories.clear }
 
   context "a generated attribute hash" do
     before do
@@ -263,8 +263,8 @@ RSpec.describe "Integration test" do
     end
   end
 
-  it "raises Factory::SequenceAbuseError" do
+  it "raises FactoryGirl::SequenceAbuseError" do
     expect { Factory(:sequence_abuser) }
-      .to raise_error(Factory::SequenceAbuseError)
+      .to raise_error(FactoryGirl::SequenceAbuseError)
   end
 end

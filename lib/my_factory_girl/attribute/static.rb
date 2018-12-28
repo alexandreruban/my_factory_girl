@@ -1,4 +1,4 @@
-class Factory
+module FactoryGirl
   class Attribute
     class Static < Attribute
       def initialize(name, value)
