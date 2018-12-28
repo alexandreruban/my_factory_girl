@@ -13,6 +13,10 @@ RSpec.describe "Aliases" do
     expect(FactoryGirl.aliases_for(:test)).to include(:test_id)
   end
 
+  it "should not include an attribute as an alias when it starts with underscore" do
+    expect(FactoryGirl.aliases_for(:_id)).not_to include(:id)
+  end
+
   context "after adding an alias" do
     before do
       Factory.alias(/(.*)_suffix/, '\1')

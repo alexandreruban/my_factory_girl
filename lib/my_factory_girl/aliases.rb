@@ -1,6 +1,6 @@
 module FactoryGirl
   @aliases = [
-    [/(.*)_id/, '\1'],
+    [/(.+)_id/, '\1'],
     [/(.*)/, '\1_id'],
   ]
 
