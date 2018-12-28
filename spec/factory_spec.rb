@@ -185,10 +185,20 @@ RSpec.describe "defining a factory using a parent attribute" do
     end
 
     expect(grandchild.attributes.size).to eq(3)
-    expect(grandchild.attributes[0])
-      .to be_an_instance_of(FactoryGirl::Attribute::Callback)
     expect(grandchild.attributes[1])
       .to be_an_instance_of(FactoryGirl::Attribute::Callback)
+    expect(grandchild.attributes[2])
+      .to be_an_instance_of(FactoryGirl::Attribute::Callback)
+  end
+
+  it "allows to use parent attributes in defining additional attributes" do
+    Factory.define(:user) { |f| f.first_name "Jon" }
+    Factory.define(:child, class: :user, parent: :user) do |f|
+      f.email { |child| "#{child.first_name}@email.com"}
+    end
+    child = Factory.build(:child)
+
+    expect(child.email).to eq("Jon@email.com")
   end
 end
 
