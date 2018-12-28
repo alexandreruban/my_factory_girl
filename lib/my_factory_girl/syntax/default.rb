@@ -35,8 +35,8 @@ module FactoryGirl
             )
           end
 
-          def sequence(name, &block)
-            FactoryGirl.sequences[name] = Sequence.new(&block)
+          def sequence(name, start_value = 1, &block)
+            FactoryGirl.sequences[name] = Sequence.new(start_value, &block)
           end
 
           def next(sequence)

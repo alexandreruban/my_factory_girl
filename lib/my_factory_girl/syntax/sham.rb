@@ -2,9 +2,10 @@ module FactoryGirl
   module Syntax
     module Sham
       module Sham
-        def self.method_missing(name, &block)
+        def self.method_missing(name, *args, &block)
           if block_given?
-            FactoryGirl.sequences[name] = Sequence.new(&block)
+            start_value = args.first
+            FactoryGirl.sequences[name] = Sequence.new(start_value || 1, &block)
           else
             FactoryGirl.sequences[name].next
           end

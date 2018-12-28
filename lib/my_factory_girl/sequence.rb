@@ -10,14 +10,15 @@ module FactoryGirl
   end
 
   class Sequence
-    def initialize(&proc)
+    def initialize(value = 1, &proc)
       @proc = proc
-      @value = 0
+      @value = value
     end
 
     def next
-      @value += 1
       @proc.call(@value)
+    ensure
+      @value = @value.next
     end
   end
 end

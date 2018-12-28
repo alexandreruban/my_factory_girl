@@ -163,11 +163,11 @@ RSpec.describe "defining a sequence" do
   before do
     @sequence = double("sequence")
     @name = :count
-    allow(FactoryGirl::Sequence) .to receive(:new).and_return(@sequence)
+    allow(FactoryGirl::Sequence).to receive(:new).and_return(@sequence)
   end
 
   it "creates a new sequence" do
-    expect(FactoryGirl::Sequence).to receive(:new).with(no_args).and_return(@sequence)
+    expect(FactoryGirl::Sequence).to receive(:new).with(1).and_return(@sequence)
     Factory.sequence(@name)
   end
 
@@ -176,5 +176,14 @@ RSpec.describe "defining a sequence" do
     yielded = false
     Factory.sequence(@name) { |n| yielded = true }
     expect(yielded).to be true
+  end
+
+  it "uses the supplied value as the start value" do
+    expect(FactoryGirl::Sequence)
+      .to receive(:new)
+      .with("A")
+      .and_return(@sequence)
+
+    Factory.sequence(@name, "A")
   end
 end
