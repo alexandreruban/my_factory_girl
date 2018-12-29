@@ -12,7 +12,7 @@ module FactoryGirl
 
         def factory(name, options = {}, &block)
           factory = Factory.new(name, options)
-          proxy = FactoryGirl::DefinitionProxy.new(factory)
+          proxy = DefinitionProxy.new(factory)
           proxy.instance_eval(&block)
           if parent = options.delete(:parent)
             factory.inherit_from(FactoryGirl.factory_by_name(parent))
