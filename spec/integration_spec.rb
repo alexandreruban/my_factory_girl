@@ -2,52 +2,52 @@ require "spec_helper"
 
 RSpec.describe "Integration test" do
   before do
-    Factory.define :user do |f|
-      f.first_name "Jimi"
-      f.last_name "Hendrix"
-      f.email { |a| "#{a.first_name}.#{a.last_name}@example.com".downcase }
-      f.admin false
-    end
+    FactoryGirl.define do
+      factory :user do
+        first_name "Jimi"
+        last_name "Hendrix"
+        email { |a| "#{a.first_name}.#{a.last_name}@example.com".downcase }
+        admin false
+      end
 
-    Factory.define :guest, parent: :user do |f|
-      f.last_name "Anonymous"
-      f.username "GuestUser"
-    end
+      factory :guest, parent: :user do
+        last_name "Anonymous"
+        username "GuestUser"
+      end
 
-    Factory.define Post, default_strategy: :attributes_for do |f|
-      f.title "Test Post"
-      f.association :author, factory: :user
-    end
+      factory Post, default_strategy: :attributes_for do
+        title "Test Post"
+        association :author, factory: :user
+      end
 
-    Factory.define :admin, class: User do |f|
-      f.first_name "Ben"
-      f.last_name "Strein"
-      f.email { Factory.next(:email) }
-      f.sequence(:username) { |n| "username#{n}" }
-      f.admin true
-    end
+      factory :admin, class: User do
+        first_name "Ben"
+        last_name "Strein"
+        email { Factory.next(:email) }
+        sequence(:username) { |n| "username#{n}" }
+        admin true
+      end
 
-    Factory.define :user_with_callbacks, parent: :user do |f|
-      f.after_stub { |u| u.first_name = "Stuby" }
-      f.after_build { |u| u.first_name = "Buildy" }
-      f.after_create { |u| u.last_name = "Createy" }
-    end
+      factory :user_with_callbacks, parent: :user do
+        after_stub { |u| u.first_name = "Stuby" }
+        after_build { |u| u.first_name = "Buildy" }
+        after_create { |u| u.last_name = "Createy" }
+      end
 
-    Factory.define :user_with_inherited_callbacks, parent: :user_with_callbacks do |f|
-      f.after_stub { |u| u.last_name = "Double-Stuby" }
-    end
+      factory :user_with_inherited_callbacks, parent: :user_with_callbacks do
+        after_stub { |u| u.last_name = "Double-Stuby" }
+      end
 
-    Factory.define :business do |f|
-      f.name "Supplier of Awsome"
-      f.association :owner, factory: :user
-    end
+      factory :business do
+        name "Supplier of Awsome"
+        association :owner, factory: :user
+      end
 
-    Factory.sequence :email do |n|
-      "somebody#{n}@example.com"
-    end
+      factory :sequence_abuser, class: User do
+        first_name { Factory.sequence(:email) }
+      end
 
-    Factory.define :sequence_abuser, class: User do |f|
-      f.first_name { Factory.sequence(:email) }
+      sequence(:email) { |n| "somebody#{n}@example.com" }
     end
   end
 
