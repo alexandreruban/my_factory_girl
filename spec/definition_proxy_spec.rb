@@ -5,12 +5,12 @@ RSpec.describe FactoryGirl::DefinitionProxy do
   subject { FactoryGirl::DefinitionProxy.new(factory) }
 
   it "adds a static attribute for type" do
-    subject.type
+    subject.type "value"
     expect(factory.attributes.last).to be_a(FactoryGirl::Attribute::Static)
   end
 
   it "adds a static attribute for id" do
-    subject.id
+    subject.id "value"
     expect(factory.attributes.last).to be_a(FactoryGirl::Attribute::Static)
   end
 
@@ -126,5 +126,28 @@ RSpec.describe FactoryGirl::DefinitionProxy do
 
     subject.send(:name, "value")
     expect(factory.attributes).to include(attr)
+  end
+
+  it "adds an attribute when passed an undefined method and block" do
+    attribute = double("attribute", name: :name)
+    block = -> {}
+    expect(FactoryGirl::Attribute::Dynamic)
+      .to receive(:new)
+      .with(:name, block)
+      .and_return(attribute)
+    subject.send(:name, &block)
+    expect(factory.attributes).to include(attribute)
+  end
+
+  it "adds an association when passed an undefined method without arguments or block" do
+    name = :user
+    attribute = double("attribute", name: :name)
+    expect(FactoryGirl::Attribute::Association)
+      .to receive(:new)
+      .with(name, name, {})
+      .and_return(attribute)
+
+    subject.send(name)
+    expect(factory.attributes).to include(attribute)
   end
 end

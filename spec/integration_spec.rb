@@ -10,6 +10,10 @@ RSpec.describe "Integration test" do
         admin false
       end
 
+      # TODO: add sugar for this
+      factory :author, parent: :user do
+      end
+
       factory :guest, parent: :user do
         last_name "Anonymous"
         username "GuestUser"
@@ -17,12 +21,13 @@ RSpec.describe "Integration test" do
 
       factory Post, default_strategy: :attributes_for do
         title "Test Post"
-        association :author, factory: :user
+        author
       end
 
       factory :admin, class: User do
         first_name "Ben"
         last_name "Strein"
+        # TODO: add sugar for this
         email { Factory.next(:email) }
         sequence(:username) { |n| "username#{n}" }
         admin true

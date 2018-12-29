@@ -19,7 +19,11 @@ module FactoryGirl
     end
 
     def method_missing(name, *args, &block)
-      add_attribute(name, *args, &block)
+      if args.empty? && block.nil?
+        association(name)
+      else
+        add_attribute(name, *args, &block)
+      end
     end
 
     def association(name, options = {})
