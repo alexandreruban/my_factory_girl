@@ -32,7 +32,6 @@ RSpec.describe "Integration test" do
       end
 
       factory :user_with_callbacks, parent: :user do
-        # TODO: evaluate in context of instance
         after_stub { |u| u.first_name = "Stuby" }
         after_build { |u| u.first_name = "Buildy" }
         after_create { |u| u.last_name = "Createy" }

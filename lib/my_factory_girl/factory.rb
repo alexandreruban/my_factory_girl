@@ -68,7 +68,6 @@ module FactoryGirl
 
     def define_attribute(attribute)
       name = attribute.name
-      # TODO move this checks in Attribute
       if attribute_defined?(name)
         raise AttributeDefinitionError, "Attribute already defined: #{name}"
       end
