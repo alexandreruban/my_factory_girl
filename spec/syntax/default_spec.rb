@@ -52,7 +52,7 @@ end
 RSpec.describe "defining a factory" do
   before do
     @name = :user
-    @factory = double("factory")
+    @factory = double("factory", aliases: [])
     @proxy = double("proxy")
     allow(@factory).to receive(:name).and_return(@name)
     @options = { class: "magic" }

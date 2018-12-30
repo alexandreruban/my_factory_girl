@@ -151,12 +151,6 @@ RSpec.describe FactoryGirl::DefinitionProxy do
     expect(factory.attributes).to include(attribute)
   end
 
-  it "registers its factory for an alias" do
-    aliased_name = :guest
-    expect(FactoryGirl).to receive(:register_factory).with(factory, as: aliased_name)
-    subject.aliased_as(aliased_name)
-  end
-
   it "adds a sequence when passed an undefined method with no args and no block" do
     name = :airport
     FactoryGirl.sequences[name] = FactoryGirl::Sequence.new { |value| "expected" }

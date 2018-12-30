@@ -9,10 +9,18 @@ module FactoryGirl
     end
 
     def register_factory(factory, options = {})
-      name = options[:as] || factory.name
+      if options[:as]
+        name = options[:as]
+      else
+        name = factory.name
+        factory.aliases.each do |alias_name|
+          register_factory(factory, as: alias_name)
+        end
+      end
       if self.factories[name]
         raise DuplicateDefinitionError, "Factory already defined: #{name}"
       end
+
       factories[name] = factory
     end
   end
@@ -106,6 +114,10 @@ module FactoryGirl
       attributes.select { |attr| attr.is_a?(Attribute::Association) }
     end
 
+    def aliases
+      @options[:aliases] || []
+    end
+
     private
 
     def class_for(class_or_to_s)
@@ -134,7 +146,7 @@ module FactoryGirl
     end
 
     def assert_valid_options(options)
-      invalid_keys = options.keys - [:class, :parent, :default_strategy]
+      invalid_keys = options.keys - [:class, :parent, :default_strategy, :aliases]
       unless invalid_keys == []
         raise ArgumentError, "Unknown arguments: #{invalid_keys.inspect}"
       end

@@ -3,7 +3,8 @@ require "spec_helper"
 RSpec.describe Factory, "registering a factory" do
   before do
     @name = :user
-    @factory = double("factory", name: @name)
+    @aliases = [:one, :two]
+    @factory = double("factory", name: @name, aliases: @aliases)
   end
 
   after { FactoryGirl.factories.clear }
@@ -16,6 +17,13 @@ RSpec.describe Factory, "registering a factory" do
   it "does not allow a duplicate factory definition" do
     expect { 2.times { Factory.define(:user) { |f| } } }
       .to raise_error(FactoryGirl::DuplicateDefinitionError)
+  end
+
+  it "registers aliases" do
+    FactoryGirl.register_factory(@factory)
+    @aliases.each do |alias_name|
+      expect(FactoryGirl.factory_by_name(alias_name)).to eq(@factory)
+    end
   end
 end
 
@@ -314,5 +322,13 @@ RSpec.describe "defining a factory with a default strategy parameter" do
   it "creates a new factory with a specified default strategy" do
     factory = Factory.define(:object, default_strategy: :stub) {}
     expect(factory.default_strategy).to eq(:stub)
+  end
+end
+
+RSpec.describe FactoryGirl::Factory, "with aliases" do
+  it "registers the aliases" do
+    aliased_name = :guest
+    factory = FactoryGirl::Factory.new("user", :aliases => [aliased_name])
+    expect(factory.aliases).to eq([aliased_name])
   end
 end

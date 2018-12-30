@@ -5,12 +5,11 @@ RSpec.describe "Integration test" do
     FactoryGirl.define do
       sequence(:email) { |n| "somebody#{n}@example.com" }
 
-      factory :user do
+      factory :user, aliases: [:author] do
         first_name "Jimi"
         last_name "Hendrix"
         email { "#{first_name}.#{last_name}@example.com".downcase }
         admin false
-        aliased_as :author
       end
 
       factory :guest, parent: :user do
