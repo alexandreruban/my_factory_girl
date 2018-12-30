@@ -11,7 +11,7 @@ module FactoryGirl
             instance = Factory.new(name.underscore, class: self)
             proxy = FactoryGirl::DefinitionProxy.new(instance)
             proxy.instance_eval(&block)
-            FactoryGirl.factories[instance.factory_name] = instance
+            FactoryGirl.factories[instance.name] = instance
           end
         end
       end

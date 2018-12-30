@@ -54,7 +54,7 @@ RSpec.describe "defining a factory" do
     @name = :user
     @factory = double("factory")
     @proxy = double("proxy")
-    allow(@factory).to receive(:factory_name).and_return(@name)
+    allow(@factory).to receive(:name).and_return(@name)
     @options = { class: "magic" }
     allow(FactoryGirl::Factory).to receive(:new).and_return(@factory)
     allow(FactoryGirl::DefinitionProxy).to receive(:new).and_return(@proxy)

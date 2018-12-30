@@ -3,7 +3,7 @@ require "spec_helper"
 RSpec.describe Factory, "registering a factory" do
   before do
     @name = :user
-    @factory = double("factory", factory_name: @name)
+    @factory = double("factory", name: @name)
   end
 
   after { FactoryGirl.factories.clear }
@@ -29,7 +29,7 @@ RSpec.describe Factory do
   after { FactoryGirl.factories.clear }
 
   it "has a factory name" do
-    expect(@factory.factory_name).to eq(@factory_name)
+    expect(@factory.name).to eq(@factory_name)
   end
 
   it "has a build class" do
@@ -63,7 +63,7 @@ RSpec.describe Factory do
     end
 
     it "guesses the factory name from the class" do
-      expect(@factory.factory_name).to eq(@name)
+      expect(@factory.name).to eq(@name)
     end
 
     it "uses the class as the build class" do
@@ -91,7 +91,7 @@ RSpec.describe "a factory with a name ending in s" do
   end
 
   it "has a factory name" do
-    expect(@factory.factory_name).to eq(@name)
+    expect(@factory.name).to eq(@name)
   end
 
   it "has a build class" do
@@ -106,7 +106,7 @@ RSpec.describe "a factory with a string name" do
   end
 
   it "converts the string to a symbol" do
-    expect(@factory.factory_name).to eq(@name)
+    expect(@factory.name).to eq(@name)
   end
 end
 
@@ -119,7 +119,7 @@ RSpec.describe "a factory defined with a string name" do
   after { FactoryGirl.factories.clear }
 
   it "converts the string to a symbol" do
-    expect(@factory.factory_name).to eq(@name)
+    expect(@factory.name).to eq(@name)
   end
 end
 

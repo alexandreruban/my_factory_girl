@@ -9,7 +9,7 @@ module FactoryGirl
     end
 
     def register_factory(factory, options = {})
-      name = options[:as] || factory.factory_name
+      name = options[:as] || factory.name
       if self.factories[name]
         raise DuplicateDefinitionError, "Factory already defined: #{name}"
       end
@@ -30,11 +30,15 @@ module FactoryGirl
   end
 
   class Factory
-    attr_reader :factory_name
-    attr_reader :attributes
+    attr_reader :name, :attributes
+
+    def factory_name
+      puts "WARNING: factory.factory_name is deprecated. Use factory.name instead."
+      name
+    end
 
     def class_name
-      @options[:class] || factory_name
+      @options[:class] || name
     end
 
     def build_class
@@ -45,9 +49,9 @@ module FactoryGirl
       @options[:default_strategy] || :create
     end
 
-    def initialize(factory_name, options = {})
+    def initialize(name, options = {})
       assert_valid_options(options)
-      @factory_name = factory_name_for(factory_name)
+      @name = factory_name_for(name)
       @options = options
       @attributes = []
     end
@@ -71,7 +75,7 @@ module FactoryGirl
       if attribute_defined?(name)
         raise AttributeDefinitionError, "Attribute already defined: #{name}"
       end
-      if attribute.respond_to?(:factory) && attribute.factory == self.factory_name
+      if attribute.respond_to?(:factory) && attribute.factory == self.name
         raise AssociationDefinitionError, "Self-referencing association '#{name}'"
       end
       @attributes << attribute
