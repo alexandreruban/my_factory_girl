@@ -6,7 +6,7 @@ RSpec.describe "Integration test" do
       factory :user do
         first_name "Jimi"
         last_name "Hendrix"
-        email { |a| "#{a.first_name}.#{a.last_name}@example.com".downcase }
+        email { "#{first_name}.#{last_name}@example.com".downcase }
         admin false
         aliased_as :author
       end
