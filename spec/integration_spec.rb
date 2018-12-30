@@ -8,10 +8,7 @@ RSpec.describe "Integration test" do
         last_name "Hendrix"
         email { |a| "#{a.first_name}.#{a.last_name}@example.com".downcase }
         admin false
-      end
-
-      # TODO: add sugar for this
-      factory :author, parent: :user do
+        aliased_as :author
       end
 
       factory :guest, parent: :user do
@@ -34,6 +31,7 @@ RSpec.describe "Integration test" do
       end
 
       factory :user_with_callbacks, parent: :user do
+        # TODO: evaluate in context of instance
         after_stub { |u| u.first_name = "Stuby" }
         after_build { |u| u.first_name = "Buildy" }
         after_create { |u| u.last_name = "Createy" }

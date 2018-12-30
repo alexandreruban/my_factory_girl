@@ -150,4 +150,10 @@ RSpec.describe FactoryGirl::DefinitionProxy do
     subject.send(name)
     expect(factory.attributes).to include(attribute)
   end
+
+  it "registers its factory for an alias" do
+    aliased_name = :guest
+    expect(FactoryGirl).to receive(:register_factory).with(factory, as: aliased_name)
+    subject.aliased_as(aliased_name)
+  end
 end

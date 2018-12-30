@@ -232,7 +232,21 @@ RSpec.describe "when defining a child factory with a default strategy" do
   end
 end
 
-RSpec.describe "a factory for a namespaces class" do
+RSpec.describe FactoryGirl::Factory, "registered with a custom name" do
+  before do
+    @actual_name = :string
+    @custom_name = :words
+    @factory = FactoryGirl::Factory.new(@actual_name)
+
+    FactoryGirl.register_factory(@factory, as: @custom_name)
+  end
+
+  it "finds the factory using the custom name" do
+    expect(FactoryGirl.factory_by_name(@custom_name)).to eq(@factory)
+  end
+end
+
+RSpec.describe "a factory for a namespaced class" do
   before do
     @name = :settings
     @class = Admin::Settings

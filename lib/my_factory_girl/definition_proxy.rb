@@ -38,6 +38,10 @@ module FactoryGirl
       add_attribute(name) { sequence.next }
     end
 
+    def aliased_as(name)
+      FactoryGirl.register_factory(@factory, as: name)
+    end
+
     def after_build(&block)
       @factory.add_callback(:after_build, &block)
     end
