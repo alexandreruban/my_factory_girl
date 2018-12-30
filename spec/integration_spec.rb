@@ -3,6 +3,8 @@ require "spec_helper"
 RSpec.describe "Integration test" do
   before do
     FactoryGirl.define do
+      sequence(:email) { |n| "somebody#{n}@example.com" }
+
       factory :user do
         first_name "Jimi"
         last_name "Hendrix"
@@ -23,9 +25,8 @@ RSpec.describe "Integration test" do
 
       factory :admin, class: User do
         first_name "Ben"
-        last_name "Strein"
-        # TODO: add sugar for this
-        email { Factory.next(:email) }
+        last_name "Stein"
+        email
         sequence(:username) { |n| "username#{n}" }
         admin true
       end
@@ -49,8 +50,6 @@ RSpec.describe "Integration test" do
       factory :sequence_abuser, class: User do
         first_name { Factory.sequence(:email) }
       end
-
-      sequence(:email) { |n| "somebody#{n}@example.com" }
     end
   end
 

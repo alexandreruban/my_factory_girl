@@ -156,4 +156,16 @@ RSpec.describe FactoryGirl::DefinitionProxy do
     expect(FactoryGirl).to receive(:register_factory).with(factory, as: aliased_name)
     subject.aliased_as(aliased_name)
   end
+
+  it "adds a sequence when passed an undefined method with no args and no block" do
+    name = :airport
+    FactoryGirl.sequences[name] = FactoryGirl::Sequence.new { |value| "expected" }
+    subject.send(name)
+    proxy = double("proxy")
+    attribute = factory.attributes.last
+    allow(proxy).to receive(:set)
+    attribute.add_to(proxy)
+
+    expect(proxy).to have_received(:set).with(name, "expected")
+  end
 end

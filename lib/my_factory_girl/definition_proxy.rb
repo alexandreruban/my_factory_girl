@@ -20,7 +20,11 @@ module FactoryGirl
 
     def method_missing(name, *args, &block)
       if args.empty? && block.nil?
-        association(name)
+        if sequence = FactoryGirl.sequences[name]
+          add_attribute(name) { sequence.next }
+        else
+          association(name)
+        end
       else
         add_attribute(name, *args, &block)
       end
