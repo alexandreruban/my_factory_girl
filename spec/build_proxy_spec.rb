@@ -51,7 +51,7 @@ RSpec.describe FactoryGirl::Proxy::Build do
   end
 
   it "returns the built instance when asked for the result" do
-    expect(@proxy.result).to eq(@instance)
+    expect(@proxy.result(nil)).to eq(@instance)
   end
 
   it "runs the after build callback when retrieving the result" do
@@ -59,7 +59,7 @@ RSpec.describe FactoryGirl::Proxy::Build do
     @proxy.add_callback(:after_build, proc { spy.foo })
     expect(spy).to receive(:foo)
 
-    @proxy.result
+    @proxy.result(nil)
   end
 
   context "when getting an attribute" do

@@ -7,7 +7,7 @@ RSpec.describe FactoryGirl::Proxy::AttributesFor do
     end
 
     it "returns a hash when asked for the result" do
-      expect(@proxy.result).to be_a_kind_of(Hash)
+      expect(@proxy.result(nil)).to be_a_kind_of(Hash)
     end
 
     context "when asked to associate with another factory" do
@@ -17,7 +17,7 @@ RSpec.describe FactoryGirl::Proxy::AttributesFor do
       end
 
       it "should not set a value for the association" do
-        expect(@proxy.result).not_to have_key(:owner)
+        expect(@proxy.result(nil)).not_to have_key(:owner)
       end
     end
 
@@ -27,7 +27,7 @@ RSpec.describe FactoryGirl::Proxy::AttributesFor do
       end
 
       it "sets that value in the result hash" do
-        expect(@proxy.result[:attribute]).to eq("value")
+        expect(@proxy.result(nil)[:attribute]).to eq("value")
       end
 
       it "returns that value when asked for that attribute" do

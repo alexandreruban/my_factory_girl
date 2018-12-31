@@ -24,7 +24,7 @@ RSpec.describe FactoryGirl::Proxy do
     end
 
     it "raises an error when asked for the result" do
-      expect { @proxy.result }.to raise_error(NotImplementedError)
+      expect { @proxy.result(nil) }.to raise_error(NotImplementedError)
     end
 
     context "when adding callbacks" do

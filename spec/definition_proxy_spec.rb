@@ -162,4 +162,10 @@ RSpec.describe FactoryGirl::DefinitionProxy do
 
     expect(proxy).to have_received(:set).with(name, "expected")
   end
+
+  it "delegate to_create" do
+    expect(factory).to receive(:to_create) { "result" }
+
+    expect(subject.to_create).to eq("result")
+  end
 end

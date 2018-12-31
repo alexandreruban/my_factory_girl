@@ -13,11 +13,11 @@ RSpec.describe FactoryGirl::Proxy::Stub do
   end
 
   it "is not a new record" do
-    expect(@stub.result).not_to be_a_new_record
+    expect(@stub.result(nil)).not_to be_a_new_record
   end
 
   it "is not able to connect to the database" do
-    expect { @stub.result.reload }.to raise_error(RuntimeError)
+    expect { @stub.result(nil).reload }.to raise_error(RuntimeError)
   end
 
   context "when a user factory exists" do
@@ -47,14 +47,14 @@ RSpec.describe FactoryGirl::Proxy::Stub do
       end
 
       it "returns the actual instance when asked for the result" do
-        expect(@stub.result.owner).to eq(@user)
+        expect(@stub.result(nil).owner).to eq(@user)
       end
     end
   end
 
   context "when asked for the result" do
     it "returns the actual instance when asked for the result" do
-      expect(@stub.result).to eq(@instance)
+      expect(@stub.result(nil)).to eq(@instance)
     end
 
     it "runs the after_stub callback when asked for the result" do
@@ -62,7 +62,7 @@ RSpec.describe FactoryGirl::Proxy::Stub do
       expect(@spy).to receive(:foo)
       @stub.add_callback(:after_stub, proc { @spy.foo })
 
-      @stub.result
+      @stub.result(nil)
     end
   end
 

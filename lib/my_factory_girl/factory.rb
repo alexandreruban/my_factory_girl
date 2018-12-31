@@ -106,7 +106,7 @@ module FactoryGirl
           attribute.add_to(proxy)
         end
       end
-      proxy.result
+      proxy.result(@to_create_block)
     end
 
 
@@ -116,6 +116,10 @@ module FactoryGirl
 
     def aliases
       @options[:aliases] || []
+    end
+
+    def to_create(&block)
+      @to_create_block = block
     end
 
     private
@@ -150,7 +154,12 @@ module FactoryGirl
       unless invalid_keys == []
         raise ArgumentError, "Unknown arguments: #{invalid_keys.inspect}"
       end
-      assert_valid_strategy(options[:default_strategy]) if options[:default_strategy]
+
+      if options[:default_strategy]
+        assert_valid_strategy(options[:default_strategy])
+        puts "WARNING: default_strategy is deprecated"
+        puts "Override to_create if you need to prevent a call to #save!"
+      end
     end
 
     def assert_valid_strategy(strategy)

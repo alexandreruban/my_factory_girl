@@ -57,7 +57,7 @@ RSpec.describe FactoryGirl::Proxy::Create do
       @proxy.add_callback(:after_create, proc { @create_spy.foo })
       allow(@build_spy).to receive(:foo)
       allow(@create_spy).to receive(:foo)
-      @result = @proxy.result
+      @result = @proxy.result(nil)
     end
 
     it "saves the instance" do
@@ -72,6 +72,14 @@ RSpec.describe FactoryGirl::Proxy::Create do
       expect(@build_spy).to have_received(:foo)
       expect(@create_spy).to have_received(:foo)
     end
+  end
+
+  it "runs the custom create block" do
+    yielded = nil
+    block = proc { |user| yielded = user }
+    proxy = FactoryGirl::Proxy::Create.new(User)
+    proxy.result(block)
+    expect(yielded).to be_an_instance_of(User)
   end
 
   context "when setting an attribute" do
