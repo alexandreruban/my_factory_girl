@@ -16,7 +16,7 @@ module FactoryGirl
     end
 
     def next
-      @proc.call(@value)
+      @proc ? @proc.call(@value) : @value
     ensure
       @value = @value.next
     end

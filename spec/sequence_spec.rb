@@ -43,3 +43,33 @@ RSpec.describe FactoryGirl::Sequence do
     end
   end
 end
+
+RSpec.describe "a sequence defined without a block" do
+  before { @sequence = FactoryGirl::Sequence.new }
+
+  it "starts with the value of 1" do
+    expect(@sequence.next).to eq(1)
+  end
+
+  context "after being called" do
+    it "uses the next value" do
+      @sequence.next
+      expect(@sequence.next).to eq(2)
+    end
+  end
+end
+
+RSpec.describe "a custom sequence defined without a block" do
+  before { @sequence = FactoryGirl::Sequence.new("A") }
+
+  it "starts with the value of A" do
+    expect(@sequence.next).to eq("A")
+  end
+
+  context "after being called" do
+    it "uses the next value" do
+      @sequence.next
+      expect(@sequence.next).to eq("B")
+    end
+  end
+end
